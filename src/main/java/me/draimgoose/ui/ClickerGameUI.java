@@ -1,7 +1,7 @@
 package me.draimgoose.ui;
 
-import javafx.animation.FadeTransition;
 import javafx.animation.ScaleTransition;
+import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -10,10 +10,14 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.util.Duration;
 import me.draimgoose.config.GameConfig;
 import me.draimgoose.managers.BackgroundManager;
 import me.draimgoose.managers.NotificationManager;
+import me.draimgoose.managers.SoundManager;
 import me.draimgoose.panels.BoostPanel;
 import me.draimgoose.panels.UpgradePanel;
 import me.draimgoose.utils.ButtonFactory;
@@ -35,12 +39,14 @@ public class ClickerGameUI {
     private int maxBattery = 100;
     private boolean isRecharging = false;
     private NotificationManager notificationManager;
+    private SoundManager soundManager;  // Объект для управления звуками
     private Timer autoClickTimer;
     private Random random = new Random();
 
     public ClickerGameUI() {
         mainPane = new BorderPane();
         notificationManager = new NotificationManager();
+        soundManager = new SoundManager();  // Инициализация SoundManager
         initializeUI();
         startAutoClicker();  // Запускаем авто-кликер при создании UI
     }
@@ -49,18 +55,15 @@ public class ClickerGameUI {
         score = 0;
 
         // Верхняя панель с информацией
-        VBox topPanel = new VBox(10);
+        HBox topPanel = new HBox(20);  // Горизонтальный контейнер для размещения информации
         topPanel.setPadding(new Insets(10));
         topPanel.setAlignment(Pos.CENTER);
+        topPanel.setStyle("-fx-background-color: #2a2a2a; -fx-padding: 5;");  // Задний фон и уменьшенные отступы
 
-        scoreLabel = new Label("Score: 0");
-        scoreLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-
-        autoClickLabel = new Label("+0/s");
-        autoClickLabel.setStyle("-fx-font-size: 14px;");
-
-        batteryLabel = new Label("Battery: 100/100");
-        batteryLabel.setStyle("-fx-font-size: 14px;");
+        // Создание блоков информации с закругленными краями
+        scoreLabel = createRoundedLabel("Score: 0");
+        autoClickLabel = createRoundedLabel("+0/s");
+        batteryLabel = createRoundedLabel("Battery: 100/100");
 
         topPanel.getChildren().addAll(scoreLabel, autoClickLabel, batteryLabel);
         mainPane.setTop(topPanel);
@@ -101,6 +104,22 @@ public class ClickerGameUI {
         mainPane.setBottom(bottomPanel);
     }
 
+    // Метод для создания закругленного блока с текстом
+    private Label createRoundedLabel(String text) {
+        Label label = new Label(text);
+        label.setStyle(
+                "-fx-background-color: #ffffff; " +  // Белый фон
+                        "-fx-border-color: #4a4a4a; " +  // Цвет границы
+                        "-fx-border-radius: 15; " +  // Закругленные углы границы
+                        "-fx-background-radius: 15; " +  // Закругленные углы фона
+                        "-fx-padding: 5 15; " +  // Отступы
+                        "-fx-font-size: 14px; " +  // Размер шрифта
+                        "-fx-font-weight: bold;"  // Жирный шрифт
+        );
+        label.setTextFill(Color.BLACK);  // Цвет текста
+        return label;
+    }
+
     private void showUpgradeMenu() {
         centerPane.getChildren().clear();  // Очищаем центральную панель
         UpgradePanel upgradePanel = new UpgradePanel(this, notificationManager);
@@ -129,6 +148,7 @@ public class ClickerGameUI {
     private void handleCookieClick(ImageView cookieImageView) {
         if (isRecharging) {
             notificationManager.showNotification("Батарея на перезарядке! Подождите.", false);
+            soundManager.playErrorSound();  // Звук ошибки
             return;
         }
 
@@ -136,6 +156,7 @@ public class ClickerGameUI {
             battery--;  // Уменьшаем батарею на 1 при каждом клике
             score += 1;
             updateUI();
+            soundManager.playClickSound();  // Звук клика
 
             if (GameConfig.areAnimationsEnabled()) {
                 animateCookie(cookieImageView);
@@ -143,6 +164,7 @@ public class ClickerGameUI {
             }
         } else {
             notificationManager.showNotification("Батарея разряжена! Перезаряжается.", false);
+            soundManager.playErrorSound();  // Звук ошибки
             rechargeBattery();  // Начинаем процесс перезарядки
         }
     }
@@ -188,6 +210,7 @@ public class ClickerGameUI {
 
     private void rechargeBattery() {
         isRecharging = true;
+        soundManager.playRechargeSound();  // Звук начала перезарядки
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
@@ -196,6 +219,7 @@ public class ClickerGameUI {
                     isRecharging = false;
                     updateUI();
                     notificationManager.showNotification("Батарея полностью заряжена!", true);
+                    soundManager.playRechargeSound();  // Звук завершения перезарядки
                 });
             }
         }, 5000);  // Перезарядка длится 5 секунд
@@ -242,6 +266,7 @@ public class ClickerGameUI {
                     if (autoClicks > 0) {
                         score += autoClicks;
                         updateUI();
+                        soundManager.playClickSound();  // Звук авто-клика
                     }
                 });
             }
