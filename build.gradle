@@ -1,6 +1,8 @@
 plugins {
     id 'application'
+    id 'java'
     id 'org.openjfx.javafxplugin' version '0.0.13'
+    id 'com.github.johnrengelman.shadow' version '7.1.2' // Shadow Plugin
 }
 
 repositories {
@@ -20,12 +22,53 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.10.1'
 }
 
-
 application {
-    mainClass = 'me.draimgoose.Main'  // Укажите ваш главный класс здесь
+    mainClass = 'me.draimgoose.Main'
 }
 
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    exclude 'META-INF/substrate/config/reflectionconfig.json'
+
+    manifest {
+        attributes(
+                'Main-Class': 'me.draimgoose.Main'
+        )
+    }
+}
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
+
+shadowJar {
+    archiveClassifier.set('')
+    manifest {
+        attributes 'Main-Class': 'me.draimgoose.Main'
+    }
+}
+
+tasks.register('createExe', Exec) {
+    dependsOn shadowJar
+
+    def jpackagePath = "C:/Program Files/Java/jdk-22/bin/jpackage.exe"
+
+    if (!file(jpackagePath).exists()) {
+        throw new GradleException("jpackage not found at $jpackagePath. Ensure you are using JDK 14 or higher.")
+    }
+
+    commandLine jpackagePath,
+            '--type', 'exe',
+            '--input', "${buildDir}/libs", // Папка с JAR-файлом
+            '--name', 'ClickerGame',
+            '--main-jar', 'Clicker-game.jar',
+            '--main-class', 'me.draimgoose.Main',
+            '--icon', 'src/main/resources/cookie.ico', // Путь к иконке в формате .ico
+            '--app-version', '1.0',
+            '--vendor', 'DraimCiDo',
+            '--java-options', '--add-modules=javafx.controls,javafx.fxml,javafx.media',
+            '--win-shortcut',
+            '--win-menu',
+            '--win-menu-group', 'Games'
+}
+
