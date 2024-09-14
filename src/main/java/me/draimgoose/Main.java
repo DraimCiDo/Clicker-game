@@ -2,24 +2,16 @@ package me.draimgoose;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.stage.Stage;
 import me.draimgoose.ui.ClickerGameUI;
-import me.draimgoose.ui.Clicker;
 
 public class Main extends Application {
-
     @Override
-    public void start(Stage primaryStage) {
-        primaryStage.setTitle("Clicker Game");
+    public void start(javafx.stage.Stage primaryStage) {
         ClickerGameUI gameUI = new ClickerGameUI();
-        new Clicker(gameUI);  // Создаем экземпляр Clicker
-        PlayerClickManager playerClickManager = new PlayerClickManager(gameUI);  // Создаем экземпляр PlayerClickManager
+        Scene scene = new Scene(gameUI.getMainPane(), 800, 600); // Размер окна можно изменить по необходимости
 
-        Scene scene = new Scene(gameUI.getMainPane(), 500, 500);
+        primaryStage.setTitle("Clicker Game");
         primaryStage.setScene(scene);
-        primaryStage.setMinWidth(500);
-        primaryStage.setMinHeight(500);
-        primaryStage.setResizable(false);  // Отключаем возможность развернуть приложение
         primaryStage.show();
     }
 

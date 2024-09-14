@@ -11,8 +11,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.util.Duration;
 import me.draimgoose.config.GameConfig;
 import me.draimgoose.managers.BackgroundManager;
@@ -28,7 +26,8 @@ import java.util.TimerTask;
 
 public class ClickerGameUI {
 
-    private BorderPane mainPane;
+    private StackPane mainPane; // StackPane для наложения уведомлений
+    private BorderPane uiPane; // Основной UI
     private StackPane centerPane;
     private Label scoreLabel;
     private Label autoClickLabel;
@@ -44,7 +43,7 @@ public class ClickerGameUI {
     private Random random = new Random();
 
     public ClickerGameUI() {
-        mainPane = new BorderPane();
+        mainPane = new StackPane(); // StackPane для наложения уведомлений
         notificationManager = new NotificationManager();
         soundManager = new SoundManager();  // Инициализация SoundManager
         initializeUI();
@@ -53,6 +52,9 @@ public class ClickerGameUI {
 
     private void initializeUI() {
         score = 0;
+
+        // Основной UI Pane
+        uiPane = new BorderPane();
 
         // Верхняя панель с информацией
         HBox topPanel = new HBox(20);  // Горизонтальный контейнер для размещения информации
@@ -66,16 +68,15 @@ public class ClickerGameUI {
         batteryLabel = createRoundedLabel("Battery: 100/100");
 
         topPanel.getChildren().addAll(scoreLabel, autoClickLabel, batteryLabel);
-        mainPane.setTop(topPanel);
+        uiPane.setTop(topPanel);
 
         // Основная панель
         centerPane = new StackPane();
         centerPane.setAlignment(Pos.CENTER);
         BackgroundManager.setBackgroundImage(centerPane, "/background.jpg");  // Фон для панели "Кликер"
-        centerPane.getChildren().add(notificationManager.getNotificationLabel());
+        uiPane.setCenter(centerPane);
 
         showClicker();  // По умолчанию открывается кликер
-        mainPane.setCenter(centerPane);
 
         // Нижняя панель с кнопками
         HBox bottomPanel = new HBox(10);
@@ -101,7 +102,16 @@ public class ClickerGameUI {
         bottomPanel.getChildren().addAll(upgradeButton, clickerButton, boostsButton);
         bottomPanel.setPrefHeight(50);
         bottomPanel.setStyle("-fx-background-color: #2a2a2a;");
-        mainPane.setBottom(bottomPanel);
+        uiPane.setBottom(bottomPanel);
+
+        // Добавляем основной UI Pane в StackPane
+        mainPane.getChildren().add(uiPane);
+
+        // Добавляем VBox для уведомлений поверх основного UI
+        VBox notificationBox = notificationManager.getNotificationBox();
+        mainPane.getChildren().add(notificationBox);
+        StackPane.setAlignment(notificationBox, Pos.TOP_RIGHT); // Выравнивание по верхнему правому углу
+        StackPane.setMargin(notificationBox, new Insets(10, 10, 0, 0)); // Отступ от верхнего и правого края
     }
 
     // Метод для создания закругленного блока с текстом
@@ -122,7 +132,7 @@ public class ClickerGameUI {
 
     private void showUpgradeMenu() {
         centerPane.getChildren().clear();  // Очищаем центральную панель
-        UpgradePanel upgradePanel = new UpgradePanel(this, notificationManager);
+        UpgradePanel upgradePanel = new UpgradePanel(this, notificationManager, soundManager);
         centerPane.getChildren().addAll(upgradePanel.getPanel());
     }
 
@@ -141,7 +151,7 @@ public class ClickerGameUI {
 
     private void showBoostMenu() {
         centerPane.getChildren().clear();  // Очищаем центральную панель
-        BoostPanel boostPanel = new BoostPanel(this, notificationManager);
+        BoostPanel boostPanel = new BoostPanel(this, notificationManager, soundManager);
         centerPane.getChildren().addAll(boostPanel.getPanel());
     }
 
@@ -273,7 +283,7 @@ public class ClickerGameUI {
         }, 0, 1000);  // Запускаем каждую секунду
     }
 
-    public BorderPane getMainPane() {
+    public StackPane getMainPane() { // StackPane для наложения уведомлений
         return mainPane;
     }
 }
