@@ -14,12 +14,18 @@ public class ClickerGame {
     private JPanel panel;
     private JLabel cookieLabel;
     private JLabel scoreLabel;
+    private JLabel autoClickLabel; // Метка для отображения скорости автоматических кликов
     private int score;
     private Timer animationTimer;
     private int animationStep = 0;
     private int originalY;
     private Image originalCookieImage; // Исходное изображение печенья
     private Random random = new Random(); // Для генерации случайных чисел
+
+    // Idle Clicker переменные
+    private int autoClickLevel = 0; // Уровень автоматических кликов
+    private int autoClicksPerSecond = 0; // Количество кликов в секунду
+    private Timer idleClickTimer; // Таймер для автоматических кликов
 
     public ClickerGame() {
         // Настройка окна
@@ -39,6 +45,12 @@ public class ClickerGame {
         scoreLabel.setHorizontalAlignment(SwingConstants.CENTER); // Выравнивание по центру
         scoreLabel.setBounds(frame.getWidth() / 2 - 50, 10, 100, 30); // Размещаем по центру
         panel.add(scoreLabel);
+
+        // Метка для отображения скорости автоматических кликов
+        autoClickLabel = new JLabel("+0/s");
+        autoClickLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        autoClickLabel.setBounds(frame.getWidth() / 2 - 50, 40, 100, 30); // Размещаем под счетом
+        panel.add(autoClickLabel);
 
         // Загрузка исходного изображения печенья
         URL imageUrl = getClass().getResource("/cookie.png");
@@ -60,11 +72,17 @@ public class ClickerGame {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 score++;
-                scoreLabel.setText("Score: " + score);
+                updateScoreDisplay();
                 showPlusOneAnimation(); // Показываем анимацию "+1"
                 startAnimation();
             }
         });
+
+        // Кнопка для открытия меню улучшений
+        JButton upgradeButton = new JButton("Улучшения");
+        upgradeButton.setBounds(10, frame.getHeight() - 70, 100, 30);
+        upgradeButton.addActionListener(e -> openUpgradeMenu());
+        panel.add(upgradeButton);
 
         // Добавляем ComponentListener для адаптации к изменениям размера окна
         frame.addComponentListener(new ComponentAdapter() {
@@ -76,6 +94,9 @@ public class ClickerGame {
 
         // Делаем окно видимым
         frame.setVisible(true);
+
+        // Инициализация таймера для Idle Clicker
+        idleClickTimer = new Timer(1000, e -> idleClick());
     }
 
     // Метод для адаптации компонентов и масштабирования изображения под размер окна
@@ -99,6 +120,7 @@ public class ClickerGame {
 
         // Размещаем метку для отображения счета в верхнем центре
         scoreLabel.setBounds(frameWidth / 2 - 50, 10, 100, 30);
+        autoClickLabel.setBounds(frameWidth / 2 - 50, 40, 100, 30); // Обновляем расположение авто-кликов
 
         // Перерисовываем панель
         panel.repaint();
@@ -163,6 +185,48 @@ public class ClickerGame {
             }
         });
         plusOneTimer.start();
+    }
+
+    // Открытие меню улучшений
+    private void openUpgradeMenu() {
+        JFrame upgradeFrame = new JFrame("Улучшения");
+        upgradeFrame.setSize(300, 200);
+        upgradeFrame.setLayout(new FlowLayout());
+        upgradeFrame.setLocationRelativeTo(frame);
+
+        JButton idleClickUpgradeButton = new JButton("Купить Idle Clicking (+1/s) за 10 очков");
+        idleClickUpgradeButton.addActionListener(e -> {
+            if (score >= 10) {
+                score -= 10;
+                autoClickLevel++;
+                autoClicksPerSecond = autoClickLevel; // Уровень улучшения влияет на клики в секунду
+                updateScoreDisplay();
+                updateAutoClickDisplay();
+                idleClickTimer.start(); // Запуск таймера, если не запущен
+                upgradeFrame.dispose();
+            } else {
+                JOptionPane.showMessageDialog(upgradeFrame, "Недостаточно очков!");
+            }
+        });
+
+        upgradeFrame.add(idleClickUpgradeButton);
+        upgradeFrame.setVisible(true);
+    }
+
+    // Метод для обновления отображения счета
+    private void updateScoreDisplay() {
+        scoreLabel.setText("Score: " + score);
+    }
+
+    // Метод для обновления отображения автоматических кликов
+    private void updateAutoClickDisplay() {
+        autoClickLabel.setText("+" + autoClicksPerSecond + "/s");
+    }
+
+    // Метод для автоматического клика (Idle Clicker)
+    private void idleClick() {
+        score += autoClicksPerSecond;
+        updateScoreDisplay();
     }
 
     public static void main(String[] args) {
