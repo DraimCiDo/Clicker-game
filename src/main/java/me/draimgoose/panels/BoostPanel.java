@@ -24,20 +24,14 @@ public class BoostPanel {
             GameState gameState = GameState.getInstance();
             int cost = getCostForBoost("clickBoost");
             if (gameState.getScore() >= cost) {
-                try {
-                    gameState.setScore(gameState.getScore() - cost);
-                    // Удвоение множителя улучшений
-                    gameState.setUpgradeMultiplier(gameState.getUpgradeMultiplier() * 2);
-                    // Масштабирование стоимости
-                    setCostForBoost("clickBoost", (int)(cost * 2.5));
-                    notificationManager.showNotification("Улучшение кликов куплено!", true);
-                    soundManager.playPurchaseSound(); // Звук успешной покупки
-                    gameState.saveState(); // Сохранение состояния после покупки
-                } catch (Exception e) {
-                    notificationManager.showNotification("Произошла ошибка при покупке буста.", false);
-                    soundManager.playErrorSound(); // Звук ошибки
-                    // Логирование ошибки можно добавить здесь
-                }
+                gameState.setScore(gameState.getScore() - cost);
+                // Удвоение множителя улучшений только для ручных кликов
+                gameState.setUpgradeMultiplier(gameState.getUpgradeMultiplier() * 2);
+                // Масштабирование стоимости
+                setCostForBoost("clickBoost", (int) (cost * 2.5));
+                notificationManager.showNotification("Улучшение кликов куплено!", true);
+                soundManager.playPurchaseSound(); // Звук успешной покупки
+                gameState.saveState(); // Сохранение состояния после покупки
             } else {
                 notificationManager.showNotification("Недостаточно очков!", false);
                 soundManager.playErrorSound(); // Звук ошибки
@@ -50,20 +44,14 @@ public class BoostPanel {
             GameState gameState = GameState.getInstance();
             int cost = getCostForBoost("batteryBoost");
             if (gameState.getScore() >= cost) {
-                try {
-                    gameState.setScore(gameState.getScore() - cost);
-                    gameState.setBattery(gameState.getBattery() + 50);
-                    gameState.setMaxBattery(gameState.getMaxBattery() + 50);
-                    // Масштабирование стоимости
-                    setCostForBoost("batteryBoost", (int)(cost * 2.5));
-                    notificationManager.showNotification("Увеличение батареи куплено!", true);
-                    soundManager.playPurchaseSound(); // Звук успешной покупки
-                    gameState.saveState(); // Сохранение состояния после покупки
-                } catch (Exception e) {
-                    notificationManager.showNotification("Произошла ошибка при покупке буста.", false);
-                    soundManager.playErrorSound(); // Звук ошибки
-                    // Логирование ошибки можно добавить здесь
-                }
+                gameState.setScore(gameState.getScore() - cost);
+                gameState.setBattery(gameState.getBattery() + 50);
+                gameState.setMaxBattery(gameState.getMaxBattery() + 50);
+                // Масштабирование стоимости
+                setCostForBoost("batteryBoost", (int) (cost * 2.5));
+                notificationManager.showNotification("Увеличение батареи куплено!", true);
+                soundManager.playPurchaseSound(); // Звук успешной покупки
+                gameState.saveState(); // Сохранение состояния после покупки
             } else {
                 notificationManager.showNotification("Недостаточно очков!", false);
                 soundManager.playErrorSound(); // Звук ошибки

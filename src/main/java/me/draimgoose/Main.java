@@ -16,7 +16,7 @@ public class Main extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        // Добавляем обработчик закрытия для сохранения состояния
+        // Добавляем обработчик закрытия окна для сохранения состояния
         primaryStage.setOnCloseRequest(event -> {
             GameState.getInstance().saveState();
         });

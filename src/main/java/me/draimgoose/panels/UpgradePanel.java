@@ -19,7 +19,7 @@ public class UpgradePanel {
         panel.setStyle("-fx-background-color: rgba(255, 255, 255, 0.7); -fx-padding: 20px; -fx-border-radius: 10; -fx-background-radius: 10;");
 
         // Кнопка покупки авто-клика
-        Button buyAutoClickButton = createStyledRectangleButton("Улучшить клики (+1/s)", String.valueOf(getCostForUpgrade("autoClick")));
+        Button buyAutoClickButton = createStyledRectangleButton("Улучшить авто-клик (+1/s)", String.valueOf(getCostForUpgrade("autoClick")));
         buyAutoClickButton.setOnAction(event -> {
             GameState gameState = GameState.getInstance();
             int cost = getCostForUpgrade("autoClick");
@@ -27,7 +27,7 @@ public class UpgradePanel {
                 gameState.setScore(gameState.getScore() - cost);
                 gameState.setAutoClicks(gameState.getAutoClicks() + 1);
                 // Масштабирование стоимости
-                // В данном примере стоимость зависит от уровня, поэтому дополнительного масштабирования не требуется
+                setCostForUpgrade("autoClick", (int) (cost * 2));
                 notificationManager.showNotification("Авто-клик куплен!", true);
                 soundManager.playPurchaseSound(); // Звук успешной покупки
                 gameState.saveState(); // Сохранение состояния после покупки
@@ -45,10 +45,10 @@ public class UpgradePanel {
             if (gameState.getScore() >= cost) {
                 gameState.setScore(gameState.getScore() - cost);
                 gameState.setLevel(gameState.getLevel() + 1);
-                // Увеличение множителя улучшений
+                // Увеличение множителя улучшений для ручных кликов
                 gameState.setUpgradeMultiplier(gameState.getUpgradeMultiplier() + 0.1);
                 // Масштабирование стоимости
-                // В данном примере стоимость зависит от уровня, поэтому дополнительного масштабирования не требуется
+                setCostForUpgrade("level", (int) (cost * 2.5));
                 notificationManager.showNotification("Уровень повышен!", true);
                 soundManager.playPurchaseSound(); // Звук успешной покупки
                 gameState.saveState(); // Сохранение состояния после покупки

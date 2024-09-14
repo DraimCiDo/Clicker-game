@@ -1,12 +1,17 @@
 package me.draimgoose.ui;
 
 import javafx.animation.FadeTransition;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
 import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -33,6 +38,9 @@ public class ClickerGameUI {
     private Label scoreLabel;
     private Label autoClickLabel;
     private Label batteryLabel;
+    private ProgressBar batteryProgressBar;
+    private Label rechargeLabel;
+    private Timeline rechargeTimeline;
     private NotificationManager notificationManager;
     private SoundManager soundManager;  // Объект для управления звуками
     private Timer autoClickTimer;
@@ -57,20 +65,30 @@ public class ClickerGameUI {
         HBox topPanel = new HBox(20);  // Горизонтальный контейнер для размещения информации
         topPanel.setPadding(new Insets(10));
         topPanel.setAlignment(Pos.CENTER);
-        topPanel.setStyle("-fx-background-color: #2a2a2a; -fx-padding: 5;");  // Задний фон и уменьшенные отступы
+        topPanel.setStyle("-fx-background-color: #2a2a2a; -fx-padding: 5;");  // Темный фон
 
         // Создание блоков информации с закругленными краями
         scoreLabel = createRoundedLabel("Score: " + gameState.getScore());
         autoClickLabel = createRoundedLabel("+" + gameState.getAutoClicks() + "/s");
         batteryLabel = createRoundedLabel("Battery: " + gameState.getBattery() + "/" + gameState.getMaxBattery());
 
-        topPanel.getChildren().addAll(scoreLabel, autoClickLabel, batteryLabel);
+        // Создание ProgressBar для батареи
+        batteryProgressBar = new ProgressBar();
+        batteryProgressBar.setPrefWidth(150);
+        batteryProgressBar.setProgress((double) gameState.getBattery() / gameState.getMaxBattery());
+
+        // Создание Label для отображения времени перезарядки
+        rechargeLabel = new Label("");
+        rechargeLabel.setStyle("-fx-text-fill: white; -fx-font-size: 12px;");
+
+        // Добавляем все элементы в topPanel
+        topPanel.getChildren().addAll(scoreLabel, autoClickLabel, batteryLabel, batteryProgressBar, rechargeLabel);
         uiPane.setTop(topPanel);
 
         // Основная панель
         centerPane = new StackPane();
         centerPane.setAlignment(Pos.CENTER);
-        BackgroundManager.setBackgroundImage(centerPane, "/background.jpg");  // Фон для панели "Кликер"
+        BackgroundManager.setBackgroundImage(centerPane, "/background.jpg"); // Фон для панели "Кликер"
         uiPane.setCenter(centerPane);
 
         showClicker();  // По умолчанию открывается кликер
@@ -113,18 +131,7 @@ public class ClickerGameUI {
         StackPane.setAlignment(notificationBox, Pos.TOP_RIGHT); // Выравнивание по верхнему правому углу
         StackPane.setMargin(notificationBox, new Insets(10, 10, 0, 0)); // Отступ от верхнего и правого края
 
-        // Добавляем слушатель на закрытие приложения для сохранения состояния
-        uiPane.sceneProperty().addListener((obs, oldScene, newScene) -> {
-            if (newScene != null) {
-                newScene.windowProperty().addListener((observable, oldWindow, newWindow) -> {
-                    if (newWindow != null) {
-                        newWindow.setOnCloseRequest(event -> {
-                            gameState.saveState();
-                        });
-                    }
-                });
-            }
-        });
+        // Слушатель закрытия приложения добавлен в Main.java, поэтому здесь ничего не делаем
     }
 
     // Метод для создания закругленного блока с текстом
@@ -168,7 +175,9 @@ public class ClickerGameUI {
             return;
         }
 
-        gameState.setScore(gameState.getScore() + (int)(1 * gameState.getUpgradeMultiplier()));
+        // Применение множителя при клике
+        int pointsEarned = (int) (1 * gameState.getUpgradeMultiplier());
+        gameState.setScore(gameState.getScore() + pointsEarned);
         gameState.setBattery(gameState.getBattery() - 1);
         updateUI();
 
@@ -176,7 +185,7 @@ public class ClickerGameUI {
 
         if (GameConfig.areAnimationsEnabled()) {
             animateCookie(cookieImageView);
-            showPlusOneAnimation();
+            showPlusOneAnimation(pointsEarned);  // Передаём количество очков
         }
     }
 
@@ -197,48 +206,77 @@ public class ClickerGameUI {
             scoreLabel.setText("Score: " + gameState.getScore());
             batteryLabel.setText("Battery: " + gameState.getBattery() + "/" + gameState.getMaxBattery());
             autoClickLabel.setText("+" + gameState.getAutoClicks() + "/s");
+            // Обновляем ProgressBar
+            double progress = (double) gameState.getBattery() / gameState.getMaxBattery();
+            batteryProgressBar.setProgress(progress);
         });
     }
 
-    private void showPlusOneAnimation() {
-        Label plusOne = new Label("+1");
-        plusOne.setStyle("-fx-text-fill: red; -fx-font-size: 18px; -fx-font-weight: bold;");
+    private void showPlusOneAnimation(int pointsEarned) {
+        Label plusLabel = new Label("+" + pointsEarned);
+        plusLabel.setStyle("-fx-text-fill: red; -fx-font-size: 18px; -fx-font-weight: bold;");
 
-        // Устанавливаем случайные координаты для появления "+1"
+        // Устанавливаем случайные координаты для появления "+X"
         double randomX = random.nextDouble() * (centerPane.getWidth() - 100) - (centerPane.getWidth() / 2 - 50);
         double randomY = random.nextDouble() * (centerPane.getHeight() - 100) - (centerPane.getHeight() / 2 - 50);
 
-        plusOne.setTranslateX(randomX);
-        plusOne.setTranslateY(randomY);
+        plusLabel.setTranslateX(randomX);
+        plusLabel.setTranslateY(randomY);
 
-        centerPane.getChildren().add(plusOne);
+        centerPane.getChildren().add(plusLabel);
 
-        FadeTransition fadeTransition = new FadeTransition(Duration.millis(1000), plusOne);
+        // Создаем анимацию перемещения вверх и исчезновения
+        TranslateTransition translateTransition = new TranslateTransition(Duration.millis(1000), plusLabel);
+        translateTransition.setByY(-50);  // Перемещение вверх на 50 пикселей
+
+        FadeTransition fadeTransition = new FadeTransition(Duration.millis(1000), plusLabel);
         fadeTransition.setFromValue(1.0);
         fadeTransition.setToValue(0.0);
-        fadeTransition.setOnFinished(event -> centerPane.getChildren().remove(plusOne));
+
+        // Запускаем обе анимации параллельно
+        translateTransition.play();
         fadeTransition.play();
+
+        // Удаляем Label после завершения анимации
+        fadeTransition.setOnFinished(event -> centerPane.getChildren().remove(plusLabel));
     }
 
     private void rechargeBattery() {
         GameState gameState = GameState.getInstance();
         gameState.setBattery(0);
-        gameState.setMaxBattery(gameState.getMaxBattery()); // Для потенциального расширения
-        gameState.saveState(); // Сохраняем состояние до перезарядки
+        gameState.saveState(); // Сохранение состояния до перезарядки
 
         soundManager.playRechargeSound();  // Звук начала перезарядки
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Platform.runLater(() -> {
-                    gameState.setBattery(gameState.getMaxBattery());
-                    gameState.saveState(); // Сохраняем состояние после перезарядки
-                    updateUI();
-                    notificationManager.showNotification("Батарея полностью заряжена!", true);
-                    soundManager.playRechargeSound();  // Звук завершения перезарядки
-                });
+        notificationManager.showNotification("Батарея разряжена! Перезаряжается.", false);
+
+        // Отображение метки перезарядки
+        rechargeLabel.setText("Перезарядка: 5 секунд");
+
+        // Инициализация Timeline для обновления ProgressBar и Label
+        rechargeTimeline = new Timeline(
+                new KeyFrame(Duration.ZERO, new KeyValue(batteryProgressBar.progressProperty(), 0)),
+                new KeyFrame(Duration.seconds(5), new KeyValue(batteryProgressBar.progressProperty(), 1))
+        );
+
+        // Обновление Label каждую секунду
+        rechargeTimeline.currentTimeProperty().addListener((obs, oldTime, newTime) -> {
+            int remainingSeconds = 5 - (int) newTime.toSeconds();
+            if (remainingSeconds > 0) {
+                rechargeLabel.setText("Перезарядка: " + remainingSeconds + " секунд");
+            } else {
+                rechargeLabel.setText("Батарея полностью заряжена!");
             }
-        }, 5000);  // Перезарядка длится 5 секунд
+        });
+
+        rechargeTimeline.setOnFinished(event -> {
+            gameState.setBattery(gameState.getMaxBattery());
+            gameState.saveState(); // Сохранение состояния после перезарядки
+            rechargeLabel.setText("Батарея полностью заряжена!");
+            notificationManager.showNotification("Батарея полностью заряжена!", true);
+            soundManager.playRechargeSound();  // Звук завершения перезарядки
+        });
+
+        rechargeTimeline.play();
     }
 
     public int getScore() {
@@ -284,17 +322,12 @@ public class ClickerGameUI {
             public void run() {
                 Platform.runLater(() -> {
                     GameState gameState = GameState.getInstance();
-                    if (gameState.getAutoClicks() > 0 && gameState.getBattery() > 0) {
-                        gameState.setScore(gameState.getScore() + (int)(gameState.getAutoClicks() * gameState.getUpgradeMultiplier()));
-                        gameState.setBattery(gameState.getBattery() - gameState.getAutoClicks());
+                    if (gameState.getAutoClicks() > 0) {
+                        int autoPoints = gameState.getAutoClicks(); // Без применения множителя
+                        gameState.setScore(gameState.getScore() + autoPoints);
                         updateUI();
                         soundManager.playClickSound();  // Звук авто-клика
-
-                        if (gameState.getBattery() <= 0) {
-                            notificationManager.showNotification("Батарея разряжена! Перезаряжается.", false);
-                            soundManager.playErrorSound();  // Звук ошибки
-                            rechargeBattery();  // Начало перезарядки
-                        }
+                        showPlusOneAnimation(autoPoints);  // Отображение анимации
                     }
                 });
             }

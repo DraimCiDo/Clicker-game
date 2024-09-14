@@ -3,18 +3,13 @@ package me.draimgoose.managers;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import me.draimgoose.ui.ClickerGameUI;
 
 import java.io.*;
 import java.lang.reflect.Type;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 
 public class GameState {
 
     private static GameState instance;
-    private static final Logger logger = Logger.getLogger(GameState.class.getName());
 
     private int score;
     private int autoClicks;
@@ -99,10 +94,8 @@ public class GameState {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         try (Writer writer = new FileWriter(SAVE_FILE)) {
             gson.toJson(this, writer);
-            logger.info("Состояние игры успешно сохранено.");
         } catch (IOException e) {
-            logger.log(Level.SEVERE, "Ошибка при сохранении состояния игры: ", e);
-            // Дополнительно можно уведомить пользователя через UI
+            e.printStackTrace();
         }
     }
 
@@ -119,16 +112,12 @@ public class GameState {
                 this.maxBattery = loadedState.maxBattery;
                 this.level = loadedState.level;
                 this.upgradeMultiplier = loadedState.upgradeMultiplier;
-                logger.info("Состояние игры успешно загружено.");
             }
         } catch (FileNotFoundException e) {
-            logger.log(Level.WARNING, "Файл сохранения не найден. Используются начальные значения.", e);
-            // Возможно, показать уведомление пользователю
+            // Файл сохранения не найден, использовать начальные значения
+            System.out.println("Файл сохранения не найден. Используются начальные значения.");
         } catch (IOException e) {
-            logger.log(Level.SEVERE, "Ошибка при загрузке состояния игры: ", e);
-            // Дополнительно можно уведомить пользователя через UI
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Неизвестная ошибка при загрузке состояния игры: ", e);
+            e.printStackTrace();
         }
     }
 }
