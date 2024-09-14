@@ -59,7 +59,7 @@ tasks.register('createExe', Exec) {
 
     commandLine jpackagePath,
             '--type', 'exe',
-            '--input', "${buildDir}/libs", // Папка с JAR-файлом
+            '--input', "out", // Папка с JAR-файлом
             '--name', 'ClickerGame',
             '--main-jar', 'Clicker-game.jar',
             '--main-class', 'me.draimgoose.Main',
