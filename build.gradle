@@ -8,9 +8,18 @@ repositories {
 }
 
 dependencies {
-    // No need to add Swing dependency as it's part of the JDK
+
 }
 
 application {
     mainClass = 'me.draimgoose.ClickerGame'
+}
+
+// Ensure resources are included
+sourceSets {
+    main {
+        resources {
+            srcDirs = ['src/main/resources']
+        }
+    }
 }
