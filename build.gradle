@@ -1,0 +1,16 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // No need to add Swing dependency as it's part of the JDK
+}
+
+application {
+    mainClass = 'me.draimgoose.ClickerGame'
+}
