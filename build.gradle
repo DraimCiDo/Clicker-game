@@ -41,6 +41,10 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
 shadowJar {
     archiveClassifier.set('')
     manifest {
@@ -59,7 +63,7 @@ tasks.register('createExe', Exec) {
 
     commandLine jpackagePath,
             '--type', 'exe',
-            '--input', "out", // Папка с JAR-файлом
+            '--input', "${buildDir}/libs", // Папка с JAR-файлом
             '--name', 'ClickerGame',
             '--main-jar', 'Clicker-game.jar',
             '--main-class', 'me.draimgoose.Main',
