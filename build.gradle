@@ -1,5 +1,4 @@
 plugins {
-    id 'java'
     id 'application'
 }
 
@@ -8,21 +7,21 @@ repositories {
 }
 
 dependencies {
-
+    implementation 'org.openjfx:javafx-base:20:win'  // Замените 'win' на вашу ОС: 'linux' или 'mac'
+    implementation 'org.openjfx:javafx-controls:20:win'
+    implementation 'org.openjfx:javafx-graphics:20:win'
+    implementation 'org.openjfx:javafx-fxml:20:win'
 }
 
 application {
     mainClass = 'me.draimgoose.Main'
+    applicationDefaultJvmArgs = [
+            '--module-path',
+            'C:/javafx-sdk-22.0.2/lib',  // Замените на путь к вашей папке lib JavaFX
+            '--add-modules', 'javafx.controls,javafx.fxml'
+    ]
 }
 
-// Ensure resources are included
-sourceSets {
-    main {
-        resources {
-            srcDirs = ['src/main/resources']
-        }
-    }
-}
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
