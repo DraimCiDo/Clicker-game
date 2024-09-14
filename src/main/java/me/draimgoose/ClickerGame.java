@@ -4,6 +4,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.image.BufferedImage;
 import java.net.URL;
 
 public class ClickerGame {
@@ -15,105 +18,118 @@ public class ClickerGame {
     private Timer animationTimer;
     private int animationStep = 0;
     private int originalY;
+    private Image originalCookieImage; // Исходное изображение печенья
 
     public ClickerGame() {
-        // инициализация компонентов
-        frame = new JFrame("Clicker Game");
-        panel = new JPanel();
-        scoreLabel = new JLabel("Score: 0");
-        score = 0;
-
-        // Загрузка изображения печенья
-        ImageIcon cookieIcon = null;
-        try {
-            String imagePath = "/cookie.png";  // Путь от корня ресурсов
-            URL resource = getClass().getResource(imagePath);
-            if (resource == null) {
-                System.out.println("Debug: Image not found at path: " + imagePath);
-            } else {
-                System.out.println("Debug: Image found at path: " + resource.toString());
-                cookieIcon = new ImageIcon(resource);
-                if (cookieIcon.getIconWidth() == -1) {
-                    System.out.println("Debug: Image couldn't load properly.");
-                } else {
-                    System.out.println("Debug: Image loaded successfully.");
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("Debug: Exception while loading image - " + e.getMessage());
-        }
-
-        // инициализация метки с загруженным изображением
-        cookieLabel = new JLabel(cookieIcon);
-        cookieLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
         // Настройка окна
+        frame = new JFrame("Clicker Game");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(400, 400);
-        frame.setLayout(new BorderLayout());
+        frame.setMinimumSize(new Dimension(300, 300));
 
         // Настройка панели
-        panel.setLayout(null);  // используем абсолютное позиционирование для плавной анимации
+        panel = new JPanel();
+        panel.setLayout(null); // Используем абсолютное позиционирование
+        frame.add(panel);
+
+        // Метка для отображения счета
+        scoreLabel = new JLabel("Score: 0");
         scoreLabel.setBounds(10, 10, 100, 30);
         panel.add(scoreLabel);
 
-        // Установите начальное положение cookieLabel, если изображение загружено
-        if (cookieIcon != null && cookieIcon.getIconWidth() != -1) {
-            cookieLabel.setBounds(150, 150, cookieIcon.getIconWidth(), cookieIcon.getIconHeight());
-            originalY = cookieLabel.getY(); // Сохраните исходное положение по оси Y
-            panel.add(cookieLabel);
-        } else {
-            System.out.println("Debug: Cookie icon is null or image not loaded properly.");
+        // Загрузка исходного изображения печенья
+        URL imageUrl = getClass().getResource("/cookie.png");
+        if (imageUrl == null) {
+            System.out.println("Ошибка: изображение не загружено.");
+            return; // Прекращаем выполнение, если изображение не загружено
         }
 
-        // Добавьте MouseListener к изображению печенья для обработки событий кликов
+        originalCookieImage = new ImageIcon(imageUrl).getImage(); // Сохраняем исходное изображение
+
+        // Инициализируем метку с изображением
+        cookieLabel = new JLabel(new ImageIcon(originalCookieImage));
+        cookieLabel.setBounds(150, 150, 100, 100); // Устанавливаем начальные размеры метки
+        originalY = cookieLabel.getY(); // Сохраняем исходное положение по оси Y
+        panel.add(cookieLabel);
+
+        // Добавляем обработчик событий для клика по изображению
         cookieLabel.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 score++;
                 scoreLabel.setText("Score: " + score);
                 startAnimation();
-                System.out.println("Debug: Cookie clicked. Current score: " + score);
             }
         });
 
-        // Добавьте панель в окно
-        frame.add(panel);
+        // Добавляем ComponentListener для адаптации к изменениям размера окна
+        frame.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                adaptComponentsToWindowSize();
+            }
+        });
 
-        // Сделайте окно видимым
+        // Делаем окно видимым
         frame.setVisible(true);
-        System.out.println("Debug: Application started.");
+    }
+
+    // Метод для адаптации компонентов и масштабирования изображения под размер окна
+    private void adaptComponentsToWindowSize() {
+        int frameWidth = frame.getContentPane().getWidth();
+        int frameHeight = frame.getContentPane().getHeight();
+
+        // Определяем новые размеры для печенья (50% от ширины и 50% от высоты окна)
+        int newWidth = (int) (frameWidth * 0.5);
+        int newHeight = (int) (frameHeight * 0.5);
+
+        // Масштабируем изображение печенья
+        Image scaledImage = originalCookieImage.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH);
+        cookieLabel.setIcon(new ImageIcon(scaledImage));
+
+        // Центрируем метку печенья
+        int newX = (frameWidth - newWidth) / 2;
+        int newY = (frameHeight - newHeight) / 2;
+        cookieLabel.setBounds(newX, newY, newWidth, newHeight);
+        originalY = newY; // Обновляем исходное положение по оси Y
+
+        // Размещаем метку для отображения счета в верхнем левом углу
+        scoreLabel.setBounds(10, 10, 100, 30);
+
+        // Перерисовываем панель
+        panel.repaint();
     }
 
     private void startAnimation() {
         if (animationTimer != null && animationTimer.isRunning()) {
-            animationTimer.stop(); // Остановить любую существующую анимацию
+            animationTimer.stop(); // Останавливаем текущую анимацию
         }
 
         animationStep = 0; // Сброс шага анимации
+        int animationRange = 20; // Амплитуда анимации
 
-        // Создаем таймер для обработки анимации
+        // Создаем таймер для анимации
         animationTimer = new Timer(15, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 animationStep++;
-                int newY = originalY + (int) (Math.sin(animationStep * 0.2) * 20); // Плавное движение вверх и вниз
+                int newY = originalY + (int) (Math.sin(animationStep * 0.2) * animationRange); // Плавное движение вверх и вниз
 
                 cookieLabel.setLocation(cookieLabel.getX(), newY);
+                panel.repaint(); // Перерисовка панели после изменения
 
                 if (animationStep >= 30) { // Завершить после определенного количества шагов
                     animationTimer.stop();
-                    cookieLabel.setLocation(cookieLabel.getX(), originalY); // Вернуться в исходное положение
-                    System.out.println("Debug: Animation completed.");
+                    cookieLabel.setLocation(cookieLabel.getX(), originalY); // Возвращаемся в исходное положение
+                    panel.repaint(); // Перерисовка панели после изменения
                 }
             }
         });
-        animationTimer.start();
-        System.out.println("Debug: Animation started.");
+        animationTimer.start(); // Запуск анимации
     }
 
     public static void main(String[] args) {
-        // Запустите игру
+        // Запуск игры
         SwingUtilities.invokeLater(() -> new ClickerGame());
     }
 }
