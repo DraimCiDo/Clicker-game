@@ -1,41 +1,35 @@
 package me.draimgoose.animations;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
-public class CookieAnimation {
-    private Timer animationTimer;
-    private int animationStep = 0;
+public class CookieAnimation implements AnimationManager.AnimatedObject {
+    private JLabel cookieLabel;
     private int originalY;
+    private int animationStep;
+    private boolean animating;
+    private static final int ANIMATION_RANGE = 20;
 
-    public CookieAnimation(JLabel cookieLabel, int originalY) {
+    public CookieAnimation(JLabel cookieLabel, int originalY, AnimationManager manager) {
+        this.cookieLabel = cookieLabel;
         this.originalY = originalY;
-        startAnimation(cookieLabel);
+        this.animationStep = 0;
+        this.animating = true;
+        manager.addAnimatedObject(this);
     }
 
-    public void startAnimation(JLabel cookieLabel) {
-        if (animationTimer != null && animationTimer.isRunning()) {
-            animationTimer.stop(); // Останавливаем текущую анимацию, если она уже работает
+    @Override
+    public boolean update() {
+        if (!animating) return false;
+
+        animationStep++;
+        int newY = originalY + (int) (Math.sin(animationStep * 0.2) * ANIMATION_RANGE);
+        cookieLabel.setLocation(cookieLabel.getX(), newY);
+
+        if (animationStep >= 30) {
+            cookieLabel.setLocation(cookieLabel.getX(), originalY);
+            animating = false;
+            return false; // Анимация завершена
         }
-
-        int animationRange = 20;
-        animationStep = 0;
-
-        animationTimer = new Timer(15, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                animationStep++;
-                int newY = originalY + (int) (Math.sin(animationStep * 0.2) * animationRange);
-
-                cookieLabel.setLocation(cookieLabel.getX(), newY);
-
-                if (animationStep >= 30) {
-                    animationTimer.stop();
-                    cookieLabel.setLocation(cookieLabel.getX(), originalY);
-                }
-            }
-        });
-        animationTimer.start();
+        return true; // Анимация продолжается
     }
 }

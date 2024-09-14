@@ -1,9 +1,8 @@
 package me.draimgoose;
 
-import me.draimgoose.animations.CookieAnimation;
-import me.draimgoose.animations.PlusOneAnimation;
 import me.draimgoose.panels.BoostPanel;
 import me.draimgoose.panels.ClickerPanel;
+import me.draimgoose.panels.SettingsPanel;
 import me.draimgoose.panels.UpgradePanel;
 
 import javax.swing.*;
@@ -15,59 +14,52 @@ public class GamePanel {
     private ClickerPanel clickerPanel;
     private UpgradePanel upgradePanel;
     private BoostPanel boostPanel;
-    private JPanel bottomPanel; // Нижняя панель с кнопками
-    private Clicker clicker; // Логика автоматических кликов
-    private PlayerClickManager playerClickManager; // Логика кликов игрока и батареи
-    private int score; // Переменная для хранения текущего счета игрока
+    private SettingsPanel settingsPanel; // Добавляем панель настроек
+    private JPanel bottomPanel;
+    private Clicker clicker;
+    private PlayerClickManager playerClickManager;
+    private int score;  // Переменная для хранения текущего счета игрока
 
     public GamePanel() {
-        // Настройка окна
         frame = new JFrame("Clicker Game");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(500, 500);
         frame.setMinimumSize(new Dimension(500, 500));
-        frame.setResizable(false); // Запрещаем изменение размера окна
-        frame.setLocationRelativeTo(null); // Центрируем окно на экране
+        frame.setResizable(false);
+        frame.setLocationRelativeTo(null);
 
-        // Инициализация основной панели с CardLayout
         mainPanel = new JPanel(new CardLayout());
 
-        // Создаем панели
         clickerPanel = new ClickerPanel(this);
         upgradePanel = new UpgradePanel(this);
         boostPanel = new BoostPanel(this);
+        settingsPanel = new SettingsPanel(); // Инициализируем панель настроек
 
-        // Добавляем панели в mainPanel
         mainPanel.add(clickerPanel.getPanel(), "ClickerPanel");
         mainPanel.add(upgradePanel.getPanel(), "UpgradePanel");
         mainPanel.add(boostPanel.getPanel(), "BoostPanel");
+        mainPanel.add(settingsPanel.getPanel(), "SettingsPanel"); // Добавляем панель настроек
 
-        // Устанавливаем начальный экран - ClickerPanel
         ((CardLayout) mainPanel.getLayout()).show(mainPanel, "ClickerPanel");
 
-        // Добавляем основную панель в окно
         frame.add(mainPanel, BorderLayout.CENTER);
 
-        // Создаем нижнюю панель с кнопками
         createBottomPanel();
 
-        // Добавляем нижнюю панель в окно
         frame.add(bottomPanel, BorderLayout.SOUTH);
 
-        // Делаем окно видимым
         frame.setVisible(true);
 
-        // Инициализация логики
         clicker = new Clicker(this);
         playerClickManager = new PlayerClickManager(this);
 
-        score = 0; // Начальный счет
+        score = 0; // Инициализируем счет
     }
 
     private void createBottomPanel() {
         bottomPanel = new JPanel();
-        bottomPanel.setLayout(new GridLayout(1, 3)); // Используем GridLayout для равномерного размещения кнопок
-        bottomPanel.setBackground(new Color(60, 63, 65)); // Темный фон для панели
+        bottomPanel.setLayout(new GridLayout(1, 4));
+        bottomPanel.setBackground(new Color(60, 63, 65));
 
         JButton clickerButton = createStyledButton("Кликер");
         clickerButton.addActionListener(e -> switchPanel("ClickerPanel"));
@@ -80,15 +72,19 @@ public class GamePanel {
         JButton boostButton = createStyledButton("Бусты");
         boostButton.addActionListener(e -> switchPanel("BoostPanel"));
         bottomPanel.add(boostButton);
+
+        JButton settingsButton = createStyledButton("Настройки");
+        settingsButton.addActionListener(e -> switchPanel("SettingsPanel")); // Добавляем кнопку для переключения на панель настроек
+        bottomPanel.add(settingsButton);
     }
 
     private JButton createStyledButton(String text) {
         JButton button = new JButton(text);
-        button.setFont(new Font("Arial", Font.BOLD, 16)); // Увеличен шрифт для лучшей читаемости
-        button.setBackground(new Color(70, 130, 180)); // Синий цвет фона кнопки
-        button.setForeground(Color.WHITE); // Белый цвет текста кнопки
-        button.setFocusPainted(false); // Убираем рамку фокуса
-        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20)); // Устанавливаем внутренние отступы
+        button.setFont(new Font("Arial", Font.BOLD, 16));
+        button.setBackground(new Color(70, 130, 180));
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         return button;
     }
 
@@ -97,7 +93,7 @@ public class GamePanel {
         cl.show(mainPanel, panelName);
     }
 
-    // Добавляем методы getScore() и setScore()
+    // Добавляем методы getScore() и setScore() для управления счетом
     public int getScore() {
         return score;
     }
@@ -107,12 +103,14 @@ public class GamePanel {
         clickerPanel.updateScoreDisplay(); // Обновляем отображение счета на панели кликов
     }
 
+    // Метод для обновления отображения автоматических кликов
     public void updateAutoClickDisplay(int autoClicks) {
-        clickerPanel.updateAutoClickDisplay(autoClicks); // Обновляем отображение автокликов на панели кликов
+        clickerPanel.updateAutoClickDisplay(autoClicks); // Обновляем отображение на панели кликов
     }
 
+    // Добавляем метод для обновления отображения состояния батареи
     public void updateBatteryDisplay(int currentBattery, int maxBattery) {
-        clickerPanel.updateBatteryDisplay(currentBattery, maxBattery); // Обновляем отображение батареи на панели кликов
+        clickerPanel.updateBatteryDisplay(currentBattery, maxBattery); // Обновляем отображение на панели кликов
     }
 
     public Clicker getClicker() {

@@ -2,8 +2,9 @@ package me.draimgoose.panels;
 
 import me.draimgoose.GamePanel;
 import me.draimgoose.PlayerClickManager;
+import me.draimgoose.animations.AnimationManager;
 import me.draimgoose.animations.CookieAnimation;
-import me.draimgoose.animations.PlusOneAnimation;
+import me.draimgoose.config.GameConfig;  // Импортируем GameConfig
 import me.draimgoose.utils.ImageLoader;
 
 import javax.swing.*;
@@ -11,6 +12,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 public class ClickerPanel {
     private JPanel panel;
@@ -19,8 +21,10 @@ public class ClickerPanel {
     private JLabel autoClickLabel;
     private JLabel batteryLabel;
     private BufferedImage originalCookieImage;
-    private List<JLabel> activePlusOneLabels; // Список активных меток "+1"
+    private List<JLabel> activePlusOneLabels;
+    private Stack<JLabel> labelPool;  // Пул для меток "+1"
     private GamePanel gamePanel;
+    private AnimationManager animationManager;
 
     public ClickerPanel(GamePanel gamePanel) {
         this.gamePanel = gamePanel;
@@ -34,7 +38,9 @@ public class ClickerPanel {
                 }
             }
         };
-        panel.setLayout(null); // Используем абсолютное позиционирование
+        panel.setLayout(null);
+
+        this.animationManager = new AnimationManager(panel);
 
         // Инициализация меток и панели
         initializeComponents();
@@ -45,24 +51,23 @@ public class ClickerPanel {
         scoreLabel.setHorizontalAlignment(SwingConstants.CENTER);
         scoreLabel.setFont(new Font("Arial", Font.BOLD, 24));
         scoreLabel.setForeground(Color.WHITE);
-        scoreLabel.setBounds(150, 10, 200, 30); // Центрируем по ширине
+        scoreLabel.setBounds(150, 10, 200, 30);
         panel.add(scoreLabel);
 
         autoClickLabel = new JLabel("+0/s");
         autoClickLabel.setHorizontalAlignment(SwingConstants.CENTER);
         autoClickLabel.setFont(new Font("Arial", Font.ITALIC, 18));
         autoClickLabel.setForeground(Color.CYAN);
-        autoClickLabel.setBounds(150, 40, 200, 30); // Центрируем по ширине
+        autoClickLabel.setBounds(150, 40, 200, 30);
         panel.add(autoClickLabel);
 
         batteryLabel = new JLabel("Battery: 100/100");
         batteryLabel.setHorizontalAlignment(SwingConstants.CENTER);
         batteryLabel.setFont(new Font("Arial", Font.BOLD, 18));
         batteryLabel.setForeground(Color.GREEN);
-        batteryLabel.setBounds(150, 70, 200, 30); // Центрируем по ширине
+        batteryLabel.setBounds(150, 70, 200, 30);
         panel.add(batteryLabel);
 
-        // Загрузка изображения печенья с использованием утилиты ImageLoader
         originalCookieImage = ImageLoader.loadImage("/cookie.png");
 
         if (originalCookieImage != null) {
@@ -75,15 +80,7 @@ public class ClickerPanel {
             cookieLabel.addMouseListener(new java.awt.event.MouseAdapter() {
                 @Override
                 public void mouseClicked(java.awt.event.MouseEvent evt) {
-                    PlayerClickManager manager = gamePanel.getPlayerClickManager();
-                    if (manager.canClick()) {
-                        manager.useClick();
-                        gamePanel.setScore(gamePanel.getScore() + manager.getClickValue());
-                        PlusOneAnimation.showPlusOneAnimation(panel, activePlusOneLabels, manager.getClickValue());
-                        new CookieAnimation(cookieLabel, originalY);
-                    } else {
-                        JOptionPane.showMessageDialog(panel, "Батарея разряжена! Подождите восстановления.");
-                    }
+                    handleCookieClick(originalY);
                 }
             });
         } else {
@@ -91,14 +88,58 @@ public class ClickerPanel {
         }
 
         activePlusOneLabels = new ArrayList<>();
+        labelPool = new Stack<>();  // Инициализируем пул меток
     }
 
-    private JLabel createPlusOneLabel(int value) {
-        JLabel plusOneLabel = new JLabel("+" + value);
-        plusOneLabel.setForeground(Color.RED);
-        plusOneLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        plusOneLabel.setSize(50, 30);
-        return plusOneLabel;
+    private void handleCookieClick(int originalY) {
+        // Обработка клика на печеньку
+        PlayerClickManager manager = gamePanel.getPlayerClickManager();
+        if (manager.canClick()) {
+            manager.useClick();
+            gamePanel.setScore(gamePanel.getScore() + manager.getClickValue());
+
+            // Проверяем, включены ли анимации
+            if (GameConfig.areAnimationsEnabled()) {
+                // Используем метки из пула для анимации "+1"
+                SwingUtilities.invokeLater(() -> {
+                    showPlusOneAnimation(manager.getClickValue());
+                    new CookieAnimation(cookieLabel, originalY, animationManager);
+                });
+            }
+        } else {
+            JOptionPane.showMessageDialog(panel, "Батарея разряжена! Подождите восстановления.");
+        }
+    }
+
+    private void showPlusOneAnimation(int clickValue) {
+        JLabel plusOneLabel;
+        if (!labelPool.isEmpty()) {
+            plusOneLabel = labelPool.pop();  // Берем метку из пула
+            plusOneLabel.setText("+" + clickValue);
+        } else {
+            plusOneLabel = new JLabel("+" + clickValue);
+            plusOneLabel.setForeground(Color.RED);
+            plusOneLabel.setFont(new Font("Arial", Font.BOLD, 18));
+            plusOneLabel.setSize(50, 30);
+        }
+
+        int randomX = (int) (Math.random() * (panel.getWidth() - plusOneLabel.getWidth()));
+        final int[] randomY = {(int) (Math.random() * (panel.getHeight() - plusOneLabel.getHeight()))}; // Используем массив
+
+        plusOneLabel.setLocation(randomX, randomY[0]);
+        panel.add(plusOneLabel);
+        activePlusOneLabels.add(plusOneLabel);
+
+        animationManager.addAnimatedObject(() -> {
+            randomY[0] -= 2;  // Изменяем значение в массиве
+            plusOneLabel.setLocation(randomX, randomY[0]);
+            if (randomY[0] < -plusOneLabel.getHeight()) {
+                panel.remove(plusOneLabel);
+                labelPool.push(plusOneLabel);  // Возвращаем метку в пул
+                return false;
+            }
+            return true;
+        });
     }
 
     public JPanel getPanel() {

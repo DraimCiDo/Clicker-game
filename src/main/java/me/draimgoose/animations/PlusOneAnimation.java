@@ -2,54 +2,52 @@ package me.draimgoose.animations;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.List;
 import java.util.Stack;
 
-public class PlusOneAnimation {
-    private static final int MAX_PLUS_ONE_LABELS = 10;
-    private static Stack<JLabel> labelPool = new Stack<>(); // Пул для меток "+1"
+public class PlusOneAnimation implements AnimationManager.AnimatedObject {
+    private static Stack<JLabel> labelPool = new Stack<>();
+    private JLabel label;
+    private JPanel panel;
+    private int startY;
+    private int steps;
+    private List<JLabel> activePlusOneLabels;
 
-    public static void showPlusOneAnimation(JPanel panel, List<JLabel> activePlusOneLabels, int clickValue) {
-        JLabel plusOneLabel;
+    public PlusOneAnimation(JPanel panel, List<JLabel> activePlusOneLabels, int clickValue, AnimationManager manager) {
+        this.panel = panel;
+        this.activePlusOneLabels = activePlusOneLabels;
+        this.steps = 0;
 
         if (!labelPool.isEmpty()) {
-            plusOneLabel = labelPool.pop(); // Берем метку из пула
-            plusOneLabel.setText("+" + clickValue);
+            label = labelPool.pop();
+            label.setText("+" + clickValue);
         } else {
-            plusOneLabel = new JLabel("+" + clickValue);
-            plusOneLabel.setForeground(Color.RED);
-            plusOneLabel.setFont(new Font("Arial", Font.BOLD, 18));
-            plusOneLabel.setSize(50, 30);
+            label = new JLabel("+" + clickValue);
+            label.setForeground(Color.RED);
+            label.setFont(new Font("Arial", Font.BOLD, 18));
+            label.setSize(50, 30);
         }
 
-        // Генерируем случайные координаты для метки "+1"
-        int randomX = (int) (Math.random() * (panel.getWidth() - plusOneLabel.getWidth()));
-        int randomY = (int) (Math.random() * (panel.getHeight() - plusOneLabel.getHeight()));
+        int randomX = (int) (Math.random() * (panel.getWidth() - label.getWidth()));
+        startY = (int) (Math.random() * (panel.getHeight() - label.getHeight()));
 
-        plusOneLabel.setLocation(randomX, randomY);
-        panel.add(plusOneLabel);
-        activePlusOneLabels.add(plusOneLabel); // Добавляем метку в список активных
+        label.setLocation(randomX, startY);
+        panel.add(label);
+        activePlusOneLabels.add(label);
 
-        Timer plusOneTimer = new Timer(50, new ActionListener() {
-            int steps = 0;
-            int startY = randomY;
+        manager.addAnimatedObject(this);
+    }
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                steps++;
-                plusOneLabel.setLocation(randomX, startY - steps * 2);
-                if (steps > 20) {
-                    ((Timer) e.getSource()).stop();
-                    panel.remove(plusOneLabel);
-                    activePlusOneLabels.remove(plusOneLabel); // Удаляем метку из списка активных
-                    labelPool.push(plusOneLabel); // Возвращаем метку в пул
-                    panel.repaint();
-                }
-            }
-        });
-        plusOneTimer.setRepeats(true); // Обеспечиваем повторение
-        plusOneTimer.start();
+    @Override
+    public boolean update() {
+        steps++;
+        label.setLocation(label.getX(), startY - steps * 2);
+        if (steps > 20) {
+            panel.remove(label);
+            activePlusOneLabels.remove(label);
+            labelPool.push(label);
+            return false; // Анимация завершена
+        }
+        return true; // Анимация продолжается
     }
 }
