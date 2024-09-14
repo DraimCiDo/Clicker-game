@@ -3,6 +3,7 @@ package me.draimgoose;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import me.draimgoose.ui.ClickerGameUI;
+import me.draimgoose.managers.GameState;
 
 public class Main extends Application {
     @Override
@@ -14,6 +15,11 @@ public class Main extends Application {
         primaryStage.setTitle("Clicker Game");
         primaryStage.setScene(scene);
         primaryStage.show();
+
+        // Добавляем обработчик закрытия для сохранения состояния
+        primaryStage.setOnCloseRequest(event -> {
+            GameState.getInstance().saveState();
+        });
     }
 
     public static void main(String[] args) {
