@@ -7,6 +7,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class GamePanel {
@@ -24,6 +26,9 @@ public class GamePanel {
     private Random random = new Random();
     private UpgradePanel upgradePanel; // Панель для улучшений
     private Clicker clicker; // Логика автоматических кликов
+
+    private List<JLabel> activePlusOneLabels; // Список активных меток "+1"
+    private static final int MAX_PLUS_ONE_LABELS = 10; // Максимальное количество меток "+1"
 
     public GamePanel() {
         // Настройка окна
@@ -124,6 +129,9 @@ public class GamePanel {
 
         // Инициализация логики автоматических кликов
         clicker = new Clicker(this);
+
+        // Инициализация списка активных меток "+1"
+        activePlusOneLabels = new ArrayList<>();
     }
 
     // Метод для обновления отображения счета
@@ -138,6 +146,10 @@ public class GamePanel {
 
     // Метод для отображения анимации "+1" в случайном месте
     private void showPlusOneAnimation() {
+        if (activePlusOneLabels.size() >= MAX_PLUS_ONE_LABELS) {
+            return; // Если меток "+1" уже слишком много, не создаем новые
+        }
+
         int frameWidth = frame.getContentPane().getWidth();
         int frameHeight = frame.getContentPane().getHeight();
 
@@ -150,6 +162,7 @@ public class GamePanel {
         plusOneLabel.setFont(new Font("Arial", Font.BOLD, 18));
         plusOneLabel.setBounds(randomX, randomY, 50, 30);
         panel.add(plusOneLabel);
+        activePlusOneLabels.add(plusOneLabel); // Добавляем метку в список активных
 
         Timer plusOneTimer = new Timer(50, new ActionListener() {
             int steps = 0;
@@ -162,16 +175,18 @@ public class GamePanel {
                 if (steps > 20) {
                     ((Timer) e.getSource()).stop();
                     panel.remove(plusOneLabel);
+                    activePlusOneLabels.remove(plusOneLabel); // Удаляем метку из списка активных
                     panel.repaint();
                 }
             }
         });
+        plusOneTimer.setRepeats(true); // Обеспечиваем повторение
         plusOneTimer.start();
     }
 
     private void startAnimation() {
         if (animationTimer != null && animationTimer.isRunning()) {
-            animationTimer.stop();
+            return; // Не запускаем анимацию, если таймер уже работает
         }
 
         animationStep = 0;
