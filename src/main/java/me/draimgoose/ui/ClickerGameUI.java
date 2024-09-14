@@ -1,11 +1,16 @@
 package me.draimgoose.ui;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.ScaleTransition;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.util.Duration;
 import me.draimgoose.config.GameConfig;
 import me.draimgoose.managers.BackgroundManager;
 import me.draimgoose.managers.NotificationManager;
@@ -106,9 +111,13 @@ public class ClickerGameUI {
         centerPane.getChildren().clear();  // Очищаем центральную панель
         BackgroundManager.setBackgroundImage(centerPane, "/background.jpg");
 
-        Button cookieButton = ButtonFactory.createStyledButton("Печенька");
-        cookieButton.setOnAction(event -> handleCookieClick());
-        centerPane.getChildren().add(cookieButton);
+        // Используем изображение вместо кнопки
+        ImageView cookieImageView = new ImageView(new Image("/cookie.png"));
+        cookieImageView.setFitWidth(100);
+        cookieImageView.setFitHeight(100);
+        cookieImageView.setOnMouseClicked(event -> handleCookieClick(cookieImageView));  // Обработчик кликов
+
+        centerPane.getChildren().add(cookieImageView);
     }
 
     private void showBoostMenu() {
@@ -117,7 +126,7 @@ public class ClickerGameUI {
         centerPane.getChildren().addAll(boostPanel.getPanel());
     }
 
-    private void handleCookieClick() {
+    private void handleCookieClick(ImageView cookieImageView) {
         if (isRecharging) {
             notificationManager.showNotification("Батарея на перезарядке! Подождите.", false);
             return;
@@ -127,10 +136,26 @@ public class ClickerGameUI {
             battery--;  // Уменьшаем батарею на 1 при каждом клике
             score += 1;
             updateUI();
+
+            if (GameConfig.areAnimationsEnabled()) {
+                animateCookie(cookieImageView);
+                showPlusOneAnimation();
+            }
         } else {
             notificationManager.showNotification("Батарея разряжена! Перезаряжается.", false);
             rechargeBattery();  // Начинаем процесс перезарядки
         }
+    }
+
+    private void animateCookie(ImageView cookieImageView) {
+        ScaleTransition scaleTransition = new ScaleTransition(Duration.millis(150), cookieImageView);
+        scaleTransition.setFromX(1.0);
+        scaleTransition.setFromY(1.0);
+        scaleTransition.setToX(1.1);
+        scaleTransition.setToY(1.1);
+        scaleTransition.setAutoReverse(true);
+        scaleTransition.setCycleCount(2);
+        scaleTransition.play();
     }
 
     private void updateUI() {
@@ -139,6 +164,26 @@ public class ClickerGameUI {
             batteryLabel.setText("Battery: " + battery + "/" + maxBattery);
             autoClickLabel.setText("+" + autoClicks + "/s");
         });
+    }
+
+    private void showPlusOneAnimation() {
+        Label plusOne = new Label("+1");
+        plusOne.setStyle("-fx-text-fill: red; -fx-font-size: 18px; -fx-font-weight: bold;");
+
+        // Устанавливаем случайные координаты для появления "+1"
+        double randomX = random.nextDouble() * (centerPane.getWidth() - 100) - (centerPane.getWidth() / 2 - 50);
+        double randomY = random.nextDouble() * (centerPane.getHeight() - 100) - (centerPane.getHeight() / 2 - 50);
+
+        plusOne.setTranslateX(randomX);
+        plusOne.setTranslateY(randomY);
+
+        centerPane.getChildren().add(plusOne);
+
+        FadeTransition fadeTransition = new FadeTransition(Duration.millis(1000), plusOne);
+        fadeTransition.setFromValue(1.0);
+        fadeTransition.setToValue(0.0);
+        fadeTransition.setOnFinished(event -> centerPane.getChildren().remove(plusOne));
+        fadeTransition.play();
     }
 
     private void rechargeBattery() {
@@ -156,22 +201,6 @@ public class ClickerGameUI {
         }, 5000);  // Перезарядка длится 5 секунд
     }
 
-    private void startAutoClicker() {
-        autoClickTimer = new Timer();
-        autoClickTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Platform.runLater(() -> {
-                    if (autoClicks > 0) {
-                        score += autoClicks;
-                        updateUI();
-                    }
-                });
-            }
-        }, 0, 1000);  // Запускаем каждую секунду
-    }
-
-    // Добавленные геттеры
     public int getScore() {
         return score;
     }
@@ -202,6 +231,21 @@ public class ClickerGameUI {
         this.battery = currentBattery;
         this.maxBattery = maxBattery;
         batteryLabel.setText("Battery: " + currentBattery + "/" + maxBattery);
+    }
+
+    private void startAutoClicker() {
+        autoClickTimer = new Timer();
+        autoClickTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Platform.runLater(() -> {
+                    if (autoClicks > 0) {
+                        score += autoClicks;
+                        updateUI();
+                    }
+                });
+            }
+        }, 0, 1000);  // Запускаем каждую секунду
     }
 
     public BorderPane getMainPane() {
