@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import me.draimgoose.ui.ClickerGameUI;
+import me.draimgoose.ui.Clicker;
 
 public class Main extends Application {
 
@@ -11,11 +12,14 @@ public class Main extends Application {
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Clicker Game");
         ClickerGameUI gameUI = new ClickerGameUI();
-        Scene scene = new Scene(gameUI.getMainPane(), 500, 500);
+        new Clicker(gameUI);  // Создаем экземпляр Clicker
+        PlayerClickManager playerClickManager = new PlayerClickManager(gameUI);  // Создаем экземпляр PlayerClickManager
 
+        Scene scene = new Scene(gameUI.getMainPane(), 500, 500);
         primaryStage.setScene(scene);
         primaryStage.setMinWidth(500);
         primaryStage.setMinHeight(500);
+        primaryStage.setResizable(false);  // Отключаем возможность развернуть приложение
         primaryStage.show();
     }
 
