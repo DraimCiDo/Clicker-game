@@ -8,6 +8,8 @@ import java.awt.event.ActionListener;
 public class UpgradePanel {
     private JPanel upgradePanel;
     private GamePanel gamePanel;
+    private Timer animationTimer; // Таймер для анимации панели
+    private boolean isAnimating = false; // Флаг состояния анимации
 
     public UpgradePanel(JPanel parentPanel, JFrame frame, GamePanel gamePanel) {
         this.gamePanel = gamePanel;
@@ -37,9 +39,13 @@ public class UpgradePanel {
     }
 
     public void toggleUpgradePanel(JFrame frame) {
+        if (isAnimating) return; // Проверка состояния: если идет анимация, выходим
+
+        isAnimating = true; // Устанавливаем флаг состояния
+
         int targetX = (upgradePanel.getX() == frame.getWidth()) ? frame.getWidth() - 200 : frame.getWidth();
-        Timer timer = new Timer(10, null);
-        timer.addActionListener(new ActionListener() {
+        animationTimer = new Timer(10, null);
+        animationTimer.addActionListener(new ActionListener() {
             int step = 10;
 
             @Override
@@ -49,10 +55,11 @@ public class UpgradePanel {
                     upgradePanel.setLocation(currentX + (targetX < currentX ? -step : step), 0);
                     frame.repaint();
                 } else {
-                    ((Timer) e.getSource()).stop();
+                    animationTimer.stop();
+                    isAnimating = false; // Сбрасываем флаг состояния после завершения анимации
                 }
             }
         });
-        timer.start();
+        animationTimer.start();
     }
 }
