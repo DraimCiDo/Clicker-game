@@ -13,6 +13,7 @@ public class ClickerGame {
     private int score;
     private Timer animationTimer;
     private int animationStep = 0;
+    private int originalY;
 
     public ClickerGame() {
         // Initialize components
@@ -32,9 +33,14 @@ public class ClickerGame {
         frame.setLayout(new BorderLayout());
 
         // Set up panel
-        panel.setLayout(new BorderLayout());
-        panel.add(scoreLabel, BorderLayout.NORTH);
-        panel.add(cookieLabel, BorderLayout.CENTER);
+        panel.setLayout(null);  // Use absolute positioning for smooth animation
+        scoreLabel.setBounds(10, 10, 100, 30);
+        panel.add(scoreLabel);
+
+        // Set initial position of cookieLabel
+        cookieLabel.setBounds(150, 150, cookieIcon.getIconWidth(), cookieIcon.getIconHeight());
+        originalY = cookieLabel.getY(); // Save original Y position
+        panel.add(cookieLabel);
 
         // Add MouseListener to cookie image for click events
         cookieLabel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -61,28 +67,17 @@ public class ClickerGame {
         animationStep = 0; // Reset animation step
 
         // Create a timer to handle the animation
-        animationTimer = new Timer(30, new ActionListener() {
+        animationTimer = new Timer(15, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 animationStep++;
-                int scaleAmount = animationStep % 20 < 10 ? 5 : -5; // Scale up then down
+                int newY = originalY + (int) (Math.sin(animationStep * 0.2) * 20); // Smooth up and down motion
 
-                // Create new image icon with scaled size
-                ImageIcon scaledIcon = new ImageIcon(
-                        new ImageIcon(getClass().getResource("/cookie.png"))
-                                .getImage()
-                                .getScaledInstance(
-                                        cookieLabel.getWidth() + scaleAmount,
-                                        cookieLabel.getHeight() + scaleAmount,
-                                        Image.SCALE_SMOOTH
-                                )
-                );
+                cookieLabel.setLocation(cookieLabel.getX(), newY);
 
-                cookieLabel.setIcon(scaledIcon);
-
-                if (animationStep >= 20) {
+                if (animationStep >= 30) { // Finish after a certain number of steps
                     animationTimer.stop();
-                    cookieLabel.setIcon(new ImageIcon(getClass().getResource("/cookie.png"))); // Reset to original size
+                    cookieLabel.setLocation(cookieLabel.getX(), originalY); // Reset to original position
                 }
             }
         });
