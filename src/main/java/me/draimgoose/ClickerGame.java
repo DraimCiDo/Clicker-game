@@ -20,6 +20,7 @@ public class ClickerGame {
     private int animationStep = 0;
     private int originalY;
     private Image originalCookieImage; // Исходное изображение печенья
+    private Image backgroundImage; // Фоновое изображение
     private Random random = new Random(); // Для генерации случайных чисел
 
     // Idle Clicker переменные
@@ -31,25 +32,46 @@ public class ClickerGame {
         // Настройка окна
         frame = new JFrame("Clicker Game");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(400, 400);
-        frame.setMinimumSize(new Dimension(300, 300));
+        frame.setSize(500, 500);
+        frame.setMinimumSize(new Dimension(500, 500));
+        frame.setMaximumSize(new Dimension(600, 600)); // Ограничиваем размер окна
         frame.setLocationRelativeTo(null); // Центрируем окно на экране
 
-        // Настройка панели
-        panel = new JPanel();
+        // Загрузка фонового изображения
+        URL bgUrl = getClass().getResource("/background.jpg");
+        if (bgUrl != null) {
+            backgroundImage = new ImageIcon(bgUrl).getImage();
+        } else {
+            System.out.println("Ошибка: фоновое изображение не найдено.");
+        }
+
+        // Настройка панели с фоновым изображением
+        panel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (backgroundImage != null) {
+                    g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+                }
+            }
+        };
         panel.setLayout(null); // Используем абсолютное позиционирование
         frame.add(panel);
 
         // Метка для отображения счета
         scoreLabel = new JLabel("Score: 0");
         scoreLabel.setHorizontalAlignment(SwingConstants.CENTER); // Выравнивание по центру
-        scoreLabel.setBounds(frame.getWidth() / 2 - 50, 10, 100, 30); // Размещаем по центру
+        scoreLabel.setFont(new Font("Arial", Font.BOLD, 24)); // Увеличиваем шрифт
+        scoreLabel.setForeground(Color.WHITE); // Устанавливаем цвет текста
+        scoreLabel.setBounds(frame.getWidth() / 2 - 50, 10, 200, 30); // Размещаем по центру
         panel.add(scoreLabel);
 
         // Метка для отображения скорости автоматических кликов
         autoClickLabel = new JLabel("+0/s");
         autoClickLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        autoClickLabel.setBounds(frame.getWidth() / 2 - 50, 40, 100, 30); // Размещаем под счетом
+        autoClickLabel.setFont(new Font("Arial", Font.ITALIC, 18)); // Красивый шрифт
+        autoClickLabel.setForeground(Color.CYAN); // Цвет текста
+        autoClickLabel.setBounds(frame.getWidth() / 2 - 50, 40, 200, 30); // Размещаем под счетом
         panel.add(autoClickLabel);
 
         // Загрузка исходного изображения печенья
@@ -80,7 +102,12 @@ public class ClickerGame {
 
         // Кнопка для открытия меню улучшений
         JButton upgradeButton = new JButton("Улучшения");
-        upgradeButton.setBounds(10, frame.getHeight() - 70, 100, 30);
+        upgradeButton.setBounds(10, frame.getHeight() - 70, 150, 40);
+        upgradeButton.setFont(new Font("Arial", Font.BOLD, 16));
+        upgradeButton.setBackground(new Color(70, 130, 180)); // Синий цвет фона кнопки
+        upgradeButton.setForeground(Color.WHITE); // Белый цвет текста кнопки
+        upgradeButton.setFocusPainted(false); // Убираем рамку фокуса
+        upgradeButton.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 2)); // Устанавливаем границу
         upgradeButton.addActionListener(e -> openUpgradeMenu());
         panel.add(upgradeButton);
 
@@ -119,8 +146,8 @@ public class ClickerGame {
         originalY = newY; // Обновляем исходное положение по оси Y
 
         // Размещаем метку для отображения счета в верхнем центре
-        scoreLabel.setBounds(frameWidth / 2 - 50, 10, 100, 30);
-        autoClickLabel.setBounds(frameWidth / 2 - 50, 40, 100, 30); // Обновляем расположение авто-кликов
+        scoreLabel.setBounds(frameWidth / 2 - 100, 10, 200, 30);
+        autoClickLabel.setBounds(frameWidth / 2 - 100, 40, 200, 30); // Обновляем расположение авто-кликов
 
         // Перерисовываем панель
         panel.repaint();
