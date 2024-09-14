@@ -17,6 +17,7 @@ public class GamePanel {
     private JLabel cookieLabel;
     private JLabel scoreLabel;
     private JLabel autoClickLabel;
+    private JLabel batteryLabel;  // Метка для отображения состояния батареи
     private int score;
     private Timer animationTimer;
     private int animationStep = 0;
@@ -26,6 +27,7 @@ public class GamePanel {
     private Random random = new Random();
     private UpgradePanel upgradePanel; // Панель для улучшений
     private Clicker clicker; // Логика автоматических кликов
+    private PlayerClickManager playerClickManager; // Логика кликов игрока и батареи
 
     private List<JLabel> activePlusOneLabels; // Список активных меток "+1"
     private static final int MAX_PLUS_ONE_LABELS = 10; // Максимальное количество меток "+1"
@@ -76,6 +78,14 @@ public class GamePanel {
         autoClickLabel.setBounds(150, 40, 200, 30); // Центрируем по ширине
         panel.add(autoClickLabel);
 
+        // Метка для отображения состояния батареи
+        batteryLabel = new JLabel("Battery: 100/100");
+        batteryLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        batteryLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        batteryLabel.setForeground(Color.GREEN);
+        batteryLabel.setBounds(150, 70, 200, 30); // Центрируем по ширине
+        panel.add(batteryLabel);
+
         // Загрузка исходного изображения печенья
         URL imageUrl = getClass().getResource("/cookie.png");
         if (imageUrl == null) {
@@ -95,10 +105,15 @@ public class GamePanel {
         cookieLabel.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                score++;
-                updateScoreDisplay();
-                showPlusOneAnimation(); // Показываем анимацию "+1"
-                startAnimation();
+                if (playerClickManager.canClick()) { // Проверяем, может ли игрок кликнуть
+                    playerClickManager.useClick();
+                    score += playerClickManager.getClickValue(); // Добавляем очки согласно текущему улучшению кликов
+                    updateScoreDisplay();
+                    showPlusOneAnimation(); // Показываем анимацию "+1"
+                    startAnimation();
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Батарея разряжена! Подождите восстановления.");
+                }
             }
         });
 
@@ -130,6 +145,9 @@ public class GamePanel {
         // Инициализация логики автоматических кликов
         clicker = new Clicker(this);
 
+        // Инициализация логики кликов игрока и батареи
+        playerClickManager = new PlayerClickManager(this);
+
         // Инициализация списка активных меток "+1"
         activePlusOneLabels = new ArrayList<>();
     }
@@ -137,6 +155,11 @@ public class GamePanel {
     // Метод для обновления отображения счета
     public void updateScoreDisplay() {
         scoreLabel.setText("Score: " + score);
+    }
+
+    // Метод для обновления отображения батареи
+    public void updateBatteryDisplay(int currentBattery, int maxBattery) {
+        batteryLabel.setText("Battery: " + currentBattery + "/" + maxBattery);
     }
 
     // Метод для обновления отображения автоматических кликов
@@ -157,7 +180,7 @@ public class GamePanel {
         int randomX = random.nextInt(frameWidth - 50);
         int randomY = random.nextInt(frameHeight - 50);
 
-        JLabel plusOneLabel = new JLabel("+1");
+        JLabel plusOneLabel = new JLabel("+" + playerClickManager.getClickValue()); // Отображение текущего значения клика
         plusOneLabel.setForeground(Color.RED);
         plusOneLabel.setFont(new Font("Arial", Font.BOLD, 18));
         plusOneLabel.setBounds(randomX, randomY, 50, 30);
@@ -230,6 +253,7 @@ public class GamePanel {
 
         scoreLabel.setBounds(frameWidth / 2 - 100, 10, 200, 30);
         autoClickLabel.setBounds(frameWidth / 2 - 100, 40, 200, 30);
+        batteryLabel.setBounds(frameWidth / 2 - 100, 70, 200, 30);
 
         upgradePanel.adaptUpgradePanel(frameHeight);
         panel.repaint();
@@ -246,5 +270,9 @@ public class GamePanel {
 
     public Clicker getClicker() {
         return clicker;
+    }
+
+    public PlayerClickManager getPlayerClickManager() {
+        return playerClickManager;
     }
 }
