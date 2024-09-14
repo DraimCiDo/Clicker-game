@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.net.URL;
+import java.util.Random;
 
 public class ClickerGame {
     private JFrame frame;
@@ -18,6 +19,7 @@ public class ClickerGame {
     private int animationStep = 0;
     private int originalY;
     private Image originalCookieImage; // Исходное изображение печенья
+    private Random random = new Random(); // Для генерации случайных чисел
 
     public ClickerGame() {
         // Настройка окна
@@ -59,7 +61,7 @@ public class ClickerGame {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 score++;
                 scoreLabel.setText("Score: " + score);
-                showPlusOneAnimation(evt.getX(), evt.getY()); // Показываем анимацию "+1"
+                showPlusOneAnimation(); // Показываем анимацию "+1"
                 startAnimation();
             }
         });
@@ -130,22 +132,29 @@ public class ClickerGame {
         animationTimer.start(); // Запуск анимации
     }
 
-    // Метод для отображения анимации "+1" при клике
-    private void showPlusOneAnimation(int clickX, int clickY) {
+    // Метод для отображения анимации "+1" в случайном месте
+    private void showPlusOneAnimation() {
+        int frameWidth = frame.getContentPane().getWidth();
+        int frameHeight = frame.getContentPane().getHeight();
+
+        // Генерируем случайные координаты для метки "+1"
+        int randomX = random.nextInt(frameWidth - 50); // Учитываем ширину метки
+        int randomY = random.nextInt(frameHeight - 50); // Учитываем высоту метки
+
         JLabel plusOneLabel = new JLabel("+1");
         plusOneLabel.setForeground(Color.RED);
         plusOneLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        plusOneLabel.setBounds(clickX, clickY, 50, 30);
+        plusOneLabel.setBounds(randomX, randomY, 50, 30);
         panel.add(plusOneLabel);
 
         Timer plusOneTimer = new Timer(50, new ActionListener() {
             int steps = 0;
-            int startY = clickY;
+            int startY = randomY;
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 steps++;
-                plusOneLabel.setLocation(clickX, startY - steps * 2); // Двигаемся вверх
+                plusOneLabel.setLocation(randomX, startY - steps * 2); // Двигаемся вверх
                 if (steps > 20) { // Через несколько шагов удаляем метку
                     ((Timer) e.getSource()).stop();
                     panel.remove(plusOneLabel);
