@@ -14,6 +14,7 @@ import javafx.util.Duration;
 import me.draimgoose.PlayerClickManager;
 import me.draimgoose.config.GameConfig;
 
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -32,6 +33,7 @@ public class ClickerGameUI {
     private boolean isRecharging = false;
 
     private Timer autoClickTimer;
+    private Random random = new Random(); // Random для появления +1
 
     public ClickerGameUI() {
         mainPane = new BorderPane();
@@ -223,13 +225,20 @@ public class ClickerGameUI {
     private void showPlusOneAnimation() {
         Label plusOne = new Label("+1");
         plusOne.setStyle("-fx-text-fill: red; -fx-font-size: 18px; -fx-font-weight: bold;");
-        StackPane center = centerPane;  // Используем StackPane
-        center.getChildren().add(plusOne);
+
+        // Устанавливаем случайные координаты для появления "+1"
+        double randomX = random.nextDouble() * (centerPane.getWidth() - 100) - (centerPane.getWidth() / 2 - 50);
+        double randomY = random.nextDouble() * (centerPane.getHeight() - 100) - (centerPane.getHeight() / 2 - 50);
+
+        plusOne.setTranslateX(randomX);
+        plusOne.setTranslateY(randomY);
+
+        centerPane.getChildren().add(plusOne);
 
         FadeTransition fadeTransition = new FadeTransition(Duration.millis(1000), plusOne);
         fadeTransition.setFromValue(1.0);
         fadeTransition.setToValue(0.0);
-        fadeTransition.setOnFinished(event -> center.getChildren().remove(plusOne));
+        fadeTransition.setOnFinished(event -> centerPane.getChildren().remove(plusOne));
         fadeTransition.play();
     }
 
