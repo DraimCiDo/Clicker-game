@@ -1,0 +1,67 @@
+/* Стили для notificationBox */
+.notification-box {
+    -fx-background-color: transparent;
+}
+
+/* Стили для уведомлений */
+.notification {
+    -fx-background-color: rgba(212, 237, 218, 0.9); /* Зеленый для успеха */
+    -fx-border-color: #c3e6cb;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 2);
+}
+
+/* Стили для уведомлений об ошибках */
+.notification.error {
+    -fx-background-color: rgba(248, 215, 218, 0.9); /* Красный для ошибок */
+    -fx-border-color: #f5c6cb;
+}
+
+/* Стили для кнопки закрытия */
+.close-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #155724;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 0 0 0 10; /* Отступ слева */
+}
+
+/* Стили для основного фона */
+.main-background {
+    -fx-background-image: url("/background.jpg");
+    -fx-background-size: cover;
+    -fx-background-position: center center;
+    -fx-background-repeat: no-repeat;
+}
+
+/* Стили для закругленных меток */
+.rounded-label {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #4a4a4a;
+    -fx-border-radius: 15;
+    -fx-background-radius: 15;
+    -fx-padding: 5 15;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: black;
+}
+
+/* Стили для нижней панели кнопок */
+.bottom-panel {
+    -fx-background-color: #2a2a2a;
+}
+
+/* Стили для кнопок */
+.styled-button {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #2a2a2a;
+    -fx-border-width: 2px;
+    -fx-font-size: 14px;
+    -fx-padding: 15;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-max-width: 200px;
+    -fx-text-alignment: center;
+}

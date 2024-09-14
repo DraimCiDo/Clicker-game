@@ -6,7 +6,6 @@ import javafx.scene.layout.VBox;
 import me.draimgoose.ui.ClickerGameUI;
 import me.draimgoose.managers.NotificationManager;
 import me.draimgoose.managers.SoundManager;
-import me.draimgoose.utils.ButtonFactory;
 
 public class BoostPanel {
 
@@ -15,6 +14,7 @@ public class BoostPanel {
     public BoostPanel(ClickerGameUI ui, NotificationManager notificationManager, SoundManager soundManager) {
         panel = new VBox(15);
         panel.setAlignment(Pos.CENTER);
+        panel.getStyleClass().add("boost-panel"); // Добавляем CSS-класс
         panel.setStyle("-fx-background-color: rgba(255, 255, 255, 0.7); -fx-padding: 20px; -fx-border-radius: 10; -fx-background-radius: 10;");
 
         Button buyClickBoostButton = createStyledRectangleButton("Улучшить клики (x2)", "200 очков");
@@ -52,18 +52,7 @@ public class BoostPanel {
     private Button createStyledRectangleButton(String description, String cost) {
         Button button = new Button();
         button.setText(description + "\nСтоимость: " + cost);
-        button.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
-        button.setWrapText(true);
-        button.setMaxWidth(200);
-        button.setStyle(
-                "-fx-background-color: #ffffff; " +
-                        "-fx-border-color: #2a2a2a; " +
-                        "-fx-border-width: 2px; " +
-                        "-fx-font-size: 14px; " +
-                        "-fx-padding: 15; " +
-                        "-fx-background-radius: 10; " +
-                        "-fx-border-radius: 10;"
-        );
+        button.getStyleClass().add("styled-button"); // Применяем CSS-класс
         return button;
     }
 

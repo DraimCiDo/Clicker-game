@@ -1,7 +1,7 @@
 package me.draimgoose.ui;
 
-import javafx.animation.ScaleTransition;
 import javafx.animation.FadeTransition;
+import javafx.animation.ScaleTransition;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -55,6 +55,7 @@ public class ClickerGameUI {
 
         // Основной UI Pane
         uiPane = new BorderPane();
+        uiPane.getStyleClass().add("main-background"); // Применяем класс для фона
 
         // Верхняя панель с информацией
         HBox topPanel = new HBox(20);  // Горизонтальный контейнер для размещения информации
@@ -83,15 +84,19 @@ public class ClickerGameUI {
         bottomPanel.setPadding(new Insets(10));
         bottomPanel.setAlignment(Pos.CENTER);
         bottomPanel.setSpacing(5);
+        bottomPanel.getStyleClass().add("bottom-panel"); // Применяем класс для нижней панели
 
         // Кнопки нижней панели
         Button upgradeButton = ButtonFactory.createStyledButton("Улучшения");
+        upgradeButton.getStyleClass().add("styled-button");
         upgradeButton.setOnAction(event -> showUpgradeMenu());
 
         Button clickerButton = ButtonFactory.createStyledButton("Кликер");
+        clickerButton.getStyleClass().add("styled-button");
         clickerButton.setOnAction(event -> showClicker());
 
         Button boostsButton = ButtonFactory.createStyledButton("Бусты");
+        boostsButton.getStyleClass().add("styled-button");
         boostsButton.setOnAction(event -> showBoostMenu());
 
         // Растягиваем кнопки по ширине
@@ -101,7 +106,6 @@ public class ClickerGameUI {
 
         bottomPanel.getChildren().addAll(upgradeButton, clickerButton, boostsButton);
         bottomPanel.setPrefHeight(50);
-        bottomPanel.setStyle("-fx-background-color: #2a2a2a;");
         uiPane.setBottom(bottomPanel);
 
         // Добавляем основной UI Pane в StackPane
@@ -117,16 +121,7 @@ public class ClickerGameUI {
     // Метод для создания закругленного блока с текстом
     private Label createRoundedLabel(String text) {
         Label label = new Label(text);
-        label.setStyle(
-                "-fx-background-color: #ffffff; " +  // Белый фон
-                        "-fx-border-color: #4a4a4a; " +  // Цвет границы
-                        "-fx-border-radius: 15; " +  // Закругленные углы границы
-                        "-fx-background-radius: 15; " +  // Закругленные углы фона
-                        "-fx-padding: 5 15; " +  // Отступы
-                        "-fx-font-size: 14px; " +  // Размер шрифта
-                        "-fx-font-weight: bold;"  // Жирный шрифт
-        );
-        label.setTextFill(Color.BLACK);  // Цвет текста
+        label.getStyleClass().add("rounded-label"); // Применяем класс из CSS
         return label;
     }
 
