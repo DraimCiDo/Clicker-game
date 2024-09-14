@@ -7,9 +7,12 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.effect.BoxBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 import me.draimgoose.PlayerClickManager;
 import me.draimgoose.config.GameConfig;
@@ -70,12 +73,9 @@ public class ClickerGameUI {
         centerPane = new StackPane();
         centerPane.setAlignment(Pos.CENTER);
 
-        // Загрузка фона
-        ImageView backgroundImageView = new ImageView(new Image("/background.jpg"));
-        backgroundImageView.setPreserveRatio(false);
-        backgroundImageView.setFitWidth(500);
-        backgroundImageView.setFitHeight(500);
-        centerPane.getChildren().add(backgroundImageView);
+        // Устанавливаем фон для панели "Кликер"
+        setBackgroundImage(centerPane, "/background.jpg");
+
         centerPane.getChildren().add(notificationLabel);  // Добавляем уведомления в центр
 
         // Добавление изображений и кнопок для разных страниц
@@ -87,32 +87,69 @@ public class ClickerGameUI {
         HBox bottomPanel = new HBox(10);
         bottomPanel.setPadding(new Insets(10));
         bottomPanel.setAlignment(Pos.CENTER);
+        bottomPanel.setSpacing(5); // Разделение между кнопками
 
-        Button upgradeButton = new Button("Улучшения");
+        // Кнопки нижней панели с полным занятием пространства
+        Button upgradeButton = createStyledButton("Улучшения");
         upgradeButton.setOnAction(event -> showUpgradeMenu());
 
-        Button clickerButton = new Button("Кликер");
+        Button clickerButton = createStyledButton("Кликер");
         clickerButton.setOnAction(event -> showClicker());
 
-        Button boostsButton = new Button("Бусты");
+        Button boostsButton = createStyledButton("Бусты");
         boostsButton.setOnAction(event -> showBoostMenu());
+
+        // Добавляем кнопки в нижнюю панель и растягиваем их на всю ширину
+        HBox.setHgrow(upgradeButton, Priority.ALWAYS);
+        HBox.setHgrow(clickerButton, Priority.ALWAYS);
+        HBox.setHgrow(boostsButton, Priority.ALWAYS);
 
         bottomPanel.getChildren().addAll(upgradeButton, clickerButton, boostsButton);
         bottomPanel.setPrefHeight(50);  // Высота нижней панели
-        bottomPanel.setStyle("-fx-background-color: #f0f0f0;");  // Цвет нижней панели
-        mainPane.setBottom(bottomPanel);
+        bottomPanel.setStyle("-fx-background-color: #2a2a2a;");  // Цвет нижней панели
+        mainPane.setBottom(bottomPanel);  // Убедитесь, что панель добавлена в BorderPane
+    }
+
+    // Метод для установки фона
+    private void setBackgroundImage(Region region, String imagePath) {
+        BackgroundImage backgroundImage = new BackgroundImage(
+                new Image(imagePath, 500, 500, false, true),
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.DEFAULT,
+                BackgroundSize.DEFAULT
+        );
+        region.setBackground(new Background(backgroundImage));
+    }
+
+    // Создание стилизованной кнопки
+    private Button createStyledButton(String text) {
+        Button button = new Button(text);
+        button.setMaxWidth(Double.MAX_VALUE);
+        button.setMinWidth(100); // Устанавливаем минимальную ширину для кнопок
+        button.setStyle("-fx-background-color: #4a4a4a; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10;");
+        return button;
     }
 
     private void showUpgradeMenu() {
         centerPane.getChildren().clear();  // Очищаем центральную панель
 
+        // Размытый фон для панели "Улучшения"
+        ImageView blurredBackground = new ImageView(new Image("/background.jpg"));
+        blurredBackground.setPreserveRatio(false);
+        blurredBackground.setFitWidth(500);
+        blurredBackground.setFitHeight(500);
+        blurredBackground.setEffect(new BoxBlur(10, 10, 3));  // Применяем размытие
+        centerPane.getChildren().add(blurredBackground);
+
         VBox upgradeBox = new VBox(15);
         upgradeBox.setAlignment(Pos.CENTER);
+        upgradeBox.setStyle("-fx-background-color: rgba(255, 255, 255, 0.7); -fx-padding: 20px; -fx-border-radius: 10; -fx-background-radius: 10;");
 
         Label upgradeLabel = new Label("Улучшения");
         upgradeLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
 
-        Button buyAutoClickButton = new Button("Купить авто-клик (+1/s) - 100 очков");
+        Button buyAutoClickButton = createStyledRectangleButton("Купить авто-клик (+1/s)", "100 очков");
         buyAutoClickButton.setOnAction(event -> {
             int cost = 100;
             if (score >= cost) {
@@ -133,6 +170,9 @@ public class ClickerGameUI {
     private void showClicker() {
         centerPane.getChildren().clear();  // Очищаем центральную панель
 
+        // Устанавливаем фон для панели "Кликер"
+        setBackgroundImage(centerPane, "/background.jpg");
+
         ImageView cookieImageView = new ImageView(new Image("/cookie.png"));
         cookieImageView.setFitWidth(100);
         cookieImageView.setFitHeight(100);
@@ -144,17 +184,25 @@ public class ClickerGameUI {
     private void showBoostMenu() {
         centerPane.getChildren().clear();  // Очищаем центральную панель
 
+        // Размытый фон для панели "Бусты"
+        ImageView blurredBackground = new ImageView(new Image("/background.jpg"));
+        blurredBackground.setPreserveRatio(false);
+        blurredBackground.setFitWidth(500);
+        blurredBackground.setFitHeight(500);
+        blurredBackground.setEffect(new BoxBlur(10, 10, 3));  // Применяем размытие
+        centerPane.getChildren().add(blurredBackground);
+
         VBox boostBox = new VBox(15);
         boostBox.setAlignment(Pos.CENTER);
+        boostBox.setStyle("-fx-background-color: rgba(255, 255, 255, 0.7); -fx-padding: 20px; -fx-border-radius: 10; -fx-background-radius: 10;");
 
         Label boostLabel = new Label("Бусты");
         boostLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
 
-        Button buyClickBoostButton = new Button("Улучшить клики (x2) - 200 очков");
+        Button buyClickBoostButton = createStyledRectangleButton("Улучшить клики (x2)", "200 очков");
         buyClickBoostButton.setOnAction(event -> {
             int cost = 200;
             if (score >= cost) {
-                // Логика улучшения кликов
                 score -= cost;
                 updateUI();
                 showNotification("Улучшение кликов куплено!", true);
@@ -163,7 +211,7 @@ public class ClickerGameUI {
             }
         });
 
-        Button buyBatteryBoostButton = new Button("Увеличить батарею (+50) - 150 очков");
+        Button buyBatteryBoostButton = createStyledRectangleButton("Увеличить батарею (+50)", "150 очков");
         buyBatteryBoostButton.setOnAction(event -> {
             int cost = 150;
             if (score >= cost) {
@@ -180,6 +228,17 @@ public class ClickerGameUI {
 
         boostBox.getChildren().addAll(boostLabel, buyClickBoostButton, buyBatteryBoostButton);
         centerPane.getChildren().add(boostBox);
+    }
+
+    // Создание стилизованной кнопки покупки в виде прямоугольника
+    private Button createStyledRectangleButton(String description, String cost) {
+        Button button = new Button();
+        button.setText(description + "\nСтоимость: " + cost);
+        button.setTextAlignment(TextAlignment.CENTER);
+        button.setWrapText(true);
+        button.setMaxWidth(200);
+        button.setStyle("-fx-background-color: #ffffff; -fx-border-color: #2a2a2a; -fx-border-width: 2px; -fx-font-size: 14px; -fx-padding: 15; -fx-background-radius: 10; -fx-border-radius: 10;");
+        return button;
     }
 
     private void handleCookieClick(ImageView cookieImageView) {
