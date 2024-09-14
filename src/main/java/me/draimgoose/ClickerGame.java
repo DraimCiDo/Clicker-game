@@ -6,7 +6,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.image.BufferedImage;
 import java.net.URL;
 
 public class ClickerGame {
@@ -26,6 +25,7 @@ public class ClickerGame {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(400, 400);
         frame.setMinimumSize(new Dimension(300, 300));
+        frame.setLocationRelativeTo(null); // Центрируем окно на экране
 
         // Настройка панели
         panel = new JPanel();
@@ -34,7 +34,8 @@ public class ClickerGame {
 
         // Метка для отображения счета
         scoreLabel = new JLabel("Score: 0");
-        scoreLabel.setBounds(10, 10, 100, 30);
+        scoreLabel.setHorizontalAlignment(SwingConstants.CENTER); // Выравнивание по центру
+        scoreLabel.setBounds(frame.getWidth() / 2 - 50, 10, 100, 30); // Размещаем по центру
         panel.add(scoreLabel);
 
         // Загрузка исходного изображения печенья
@@ -58,6 +59,7 @@ public class ClickerGame {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 score++;
                 scoreLabel.setText("Score: " + score);
+                showPlusOneAnimation(evt.getX(), evt.getY()); // Показываем анимацию "+1"
                 startAnimation();
             }
         });
@@ -93,8 +95,8 @@ public class ClickerGame {
         cookieLabel.setBounds(newX, newY, newWidth, newHeight);
         originalY = newY; // Обновляем исходное положение по оси Y
 
-        // Размещаем метку для отображения счета в верхнем левом углу
-        scoreLabel.setBounds(10, 10, 100, 30);
+        // Размещаем метку для отображения счета в верхнем центре
+        scoreLabel.setBounds(frameWidth / 2 - 50, 10, 100, 30);
 
         // Перерисовываем панель
         panel.repaint();
@@ -126,6 +128,32 @@ public class ClickerGame {
             }
         });
         animationTimer.start(); // Запуск анимации
+    }
+
+    // Метод для отображения анимации "+1" при клике
+    private void showPlusOneAnimation(int clickX, int clickY) {
+        JLabel plusOneLabel = new JLabel("+1");
+        plusOneLabel.setForeground(Color.RED);
+        plusOneLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        plusOneLabel.setBounds(clickX, clickY, 50, 30);
+        panel.add(plusOneLabel);
+
+        Timer plusOneTimer = new Timer(50, new ActionListener() {
+            int steps = 0;
+            int startY = clickY;
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                steps++;
+                plusOneLabel.setLocation(clickX, startY - steps * 2); // Двигаемся вверх
+                if (steps > 20) { // Через несколько шагов удаляем метку
+                    ((Timer) e.getSource()).stop();
+                    panel.remove(plusOneLabel);
+                    panel.repaint();
+                }
+            }
+        });
+        plusOneTimer.start();
     }
 
     public static void main(String[] args) {
