@@ -1,9 +1,8 @@
 package me.draimgoose;
 
-import javax.swing.*;
-
 public class Main {
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new GamePanel());
+        // Создаем экземпляр GamePanel, который инициализирует и запускает приложение
+        new GamePanel();
     }
 }
