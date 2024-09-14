@@ -1,8 +1,21 @@
 package me.draimgoose;
 
-public class Main {
+import javafx.application.Application;
+import javafx.scene.Scene;
+import me.draimgoose.ui.ClickerGameUI;
+
+public class Main extends Application {
+    @Override
+    public void start(javafx.stage.Stage primaryStage) {
+        ClickerGameUI gameUI = new ClickerGameUI();
+        Scene scene = new Scene(gameUI.getMainPane(), 800, 600); // Размер окна можно изменить по необходимости
+
+        primaryStage.setTitle("Clicker Game");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
     public static void main(String[] args) {
-        // Создаем экземпляр GamePanel, который инициализирует и запускает приложение
-        new GamePanel();
+        launch(args);
     }
 }

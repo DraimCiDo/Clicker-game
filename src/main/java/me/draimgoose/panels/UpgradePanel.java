@@ -1,45 +1,59 @@
 package me.draimgoose.panels;
 
-import me.draimgoose.GamePanel;
-
-import javax.swing.*;
-import java.awt.*;
+import javafx.geometry.Pos;
+import javafx.scene.control.Button;
+import javafx.scene.layout.VBox;
+import me.draimgoose.ui.ClickerGameUI;
+import me.draimgoose.managers.NotificationManager;
+import me.draimgoose.managers.SoundManager;
+import me.draimgoose.utils.ButtonFactory;
 
 public class UpgradePanel {
-    private JPanel panel;
 
-    public UpgradePanel(GamePanel gamePanel) {
-        panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS)); // Используем BoxLayout для размещения кнопок вертикально
-        panel.setBackground(new Color(30, 30, 30)); // Устанавливаем темный фон для панели
+    private VBox panel;
 
-        initializeComponents(gamePanel);
-    }
+    public UpgradePanel(ClickerGameUI ui, NotificationManager notificationManager, SoundManager soundManager) {
+        panel = new VBox(15);
+        panel.setAlignment(Pos.CENTER);
+        panel.setStyle("-fx-background-color: rgba(255, 255, 255, 0.7); -fx-padding: 20px; -fx-border-radius: 10; -fx-background-radius: 10;");
 
-    private void initializeComponents(GamePanel gamePanel) {
-        JLabel titleLabel = new JLabel("Улучшения");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        titleLabel.setForeground(Color.WHITE);
-        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT); // Центрируем заголовок
-        panel.add(titleLabel);
-
-        JButton idleClickUpgradeButton = new JButton("Купить Idle Clicking (+1/s) за 10 очков");
-        idleClickUpgradeButton.setFont(new Font("Arial", Font.BOLD, 14));
-        idleClickUpgradeButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        idleClickUpgradeButton.addActionListener(e -> {
-            if (gamePanel.getScore() >= 10) {
-                gamePanel.setScore(gamePanel.getScore() - 10);
-                gamePanel.getClicker().increaseAutoClicks();
+        Button buyAutoClickButton = createStyledRectangleButton("Купить авто-клик (+1/s)", "100 очков");
+        buyAutoClickButton.setOnAction(event -> {
+            int cost = 100;
+            if (ui.getScore() >= cost) {
+                ui.updateScore(-cost);
+                ui.updateAutoClickDisplay(ui.getAutoClicks() + 1);
+                notificationManager.showNotification("Авто-клик куплен!", true);
+                soundManager.playPurchaseSound(); // Звук успешной покупки
             } else {
-                JOptionPane.showMessageDialog(panel, "Недостаточно очков!");
+                notificationManager.showNotification("Недостаточно очков!", false);
+                soundManager.playErrorSound(); // Звук ошибки
             }
         });
 
-        panel.add(Box.createRigidArea(new Dimension(0, 20))); // Добавляем отступы
-        panel.add(idleClickUpgradeButton);
+        panel.getChildren().addAll(buyAutoClickButton);
     }
 
-    public JPanel getPanel() {
+    // Метод создания кнопки с описанием и стоимостью
+    private Button createStyledRectangleButton(String description, String cost) {
+        Button button = new Button();
+        button.setText(description + "\nСтоимость: " + cost);
+        button.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
+        button.setWrapText(true);
+        button.setMaxWidth(200);
+        button.setStyle(
+                "-fx-background-color: #ffffff; " +
+                        "-fx-border-color: #2a2a2a; " +
+                        "-fx-border-width: 2px; " +
+                        "-fx-font-size: 14px; " +
+                        "-fx-padding: 15; " +
+                        "-fx-background-radius: 10; " +
+                        "-fx-border-radius: 10;"
+        );
+        return button;
+    }
+
+    public VBox getPanel() {
         return panel;
     }
 }

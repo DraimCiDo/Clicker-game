@@ -1,25 +1,33 @@
-package me.draimgoose;
+package me.draimgoose.ui;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Clicker {
-    private GamePanel gamePanel;
-    private int autoClicks = 0;
+    private ClickerGameUI gameUI;
     private int autoClickInterval = 1000; // Интервал автокликов в миллисекундах
+    private int autoClicks = 0; // Количество автокликов в секунду
 
-    public Clicker(GamePanel gamePanel) {
-        this.gamePanel = gamePanel;
-        startAutoClick();
+    public Clicker(ClickerGameUI gameUI) {
+        this.gameUI = gameUI;
+        startAutoClicker();
     }
 
-    public void startAutoClick() {
-        new javax.swing.Timer(autoClickInterval, e -> {
-            if (autoClicks > 0) {
-                gamePanel.setScore(gamePanel.getScore() + autoClicks);
+    public void startAutoClicker() {
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (autoClicks > 0) {
+                    gameUI.updateScore(autoClicks);
+                    gameUI.updateAutoClickDisplay(autoClicks);
+                }
             }
-        }).start();
+        }, autoClickInterval, autoClickInterval);
     }
 
-    public void increaseAutoClicks() {
-        autoClicks++;
-        gamePanel.updateAutoClickDisplay(autoClicks);
+    public void addAutoClick(int amount) {
+        autoClicks += amount;
+        gameUI.updateAutoClickDisplay(autoClicks);
     }
 }

@@ -1,28 +1,28 @@
 plugins {
-    id 'java'
     id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.13'
 }
 
 repositories {
     mavenCentral()
 }
 
-dependencies {
+javafx {
+    version = "20"
+    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.media' ]
+}
 
+dependencies {
+    implementation 'org.openjfx:javafx-base:20'
+    implementation 'org.openjfx:javafx-controls:20'
+    implementation 'org.openjfx:javafx-fxml:20'
+    implementation 'org.openjfx:javafx-media:20'
 }
 
 application {
-    mainClass = 'me.draimgoose.Main'
+    mainClass = 'me.draimgoose.Main'  // Укажите ваш главный класс здесь
 }
 
-// Ensure resources are included
-sourceSets {
-    main {
-        resources {
-            srcDirs = ['src/main/resources']
-        }
-    }
-}
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
