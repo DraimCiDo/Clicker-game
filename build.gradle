@@ -14,7 +14,7 @@ javafx {
 
 dependencies {
     implementation 'org.openjfx:javafx-base:20'
-    implementation 'org.openjfx:javafx-controls:22.0.2'
+    implementation 'org.openjfx:javafx-controls:23'
     implementation 'org.openjfx:javafx-fxml:20'
     implementation 'org.openjfx:javafx-media:22.0.2'
 }
