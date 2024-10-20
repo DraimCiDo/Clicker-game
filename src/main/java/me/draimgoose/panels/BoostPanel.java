@@ -23,6 +23,7 @@ public class BoostPanel {
             if (ui.getScore() >= cost) {
                 ui.updateScore(-cost);
                 // Логика улучшения кликов (например, умножение на 2)
+                ui.increaseClickMultiplier(2);
                 notificationManager.showNotification("Улучшение кликов куплено!", true);
                 soundManager.playPurchaseSound(); // Звук успешной покупки
             } else {

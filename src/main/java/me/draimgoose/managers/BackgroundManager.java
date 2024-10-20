@@ -7,7 +7,7 @@ public class BackgroundManager {
 
     public static void setBackgroundImage(Region region, String imagePath) {
         BackgroundImage backgroundImage = new BackgroundImage(
-                new Image(imagePath, 500, 500, false, true),
+                new Image(imagePath, 1920, 1080, false, true),
                 BackgroundRepeat.NO_REPEAT,
                 BackgroundRepeat.NO_REPEAT,
                 BackgroundPosition.DEFAULT,

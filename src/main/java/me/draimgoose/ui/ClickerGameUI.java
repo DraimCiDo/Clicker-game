@@ -37,6 +37,7 @@ public class ClickerGameUI {
     private int battery = 100;
     private int maxBattery = 100;
     private boolean isRecharging = false;
+    private int clickMultiplier = 100;
     private NotificationManager notificationManager;
     private SoundManager soundManager;  // Объект для управления звуками
     private Timer autoClickTimer;
@@ -156,22 +157,50 @@ public class ClickerGameUI {
             soundManager.playErrorSound();  // Звук ошибки
             return;
         }
-
+    
         if (battery > 0) {
             battery--;  // Уменьшаем батарею на 1 при каждом клике
-            score += 1;
+            int pointsEarned = clickMultiplier;  // Количество очков за клик
+            score += pointsEarned;  // Увеличиваем счет на множитель кликов
             updateUI();
             soundManager.playClickSound();  // Звук клика
-
+    
             if (GameConfig.areAnimationsEnabled()) {
                 animateCookie(cookieImageView);
-                showPlusOneAnimation();
+                showPlusPointsAnimation(pointsEarned);  // Показываем анимацию с количеством очков
             }
         } else {
             notificationManager.showNotification("Батарея разряжена! Перезаряжается.", false);
             soundManager.playErrorSound();  // Звук ошибки
             rechargeBattery();  // Начинаем процесс перезарядки
         }
+    }
+
+    private void showPlusPointsAnimation(int points) {
+        Label plusPoints = new Label("+" + points);
+        plusPoints.setStyle("-fx-text-fill: red; -fx-font-size: 18px; -fx-font-weight: bold;");
+    
+        // Устанавливаем случайные координаты для появления "+N"
+        double randomX = random.nextDouble() * (centerPane.getWidth() - 100) - (centerPane.getWidth() / 2 - 50);
+        double randomY = random.nextDouble() * (centerPane.getHeight() - 100) - (centerPane.getHeight() / 2 - 50);
+    
+        plusPoints.setTranslateX(randomX);
+        plusPoints.setTranslateY(randomY);
+    
+        centerPane.getChildren().add(plusPoints);
+    
+        // Анимация плавного исчезновения числа
+        FadeTransition fadeTransition = new FadeTransition(Duration.millis(1000), plusPoints);
+        fadeTransition.setFromValue(1.0);
+        fadeTransition.setToValue(0.0);
+        fadeTransition.setOnFinished(event -> centerPane.getChildren().remove(plusPoints));
+        fadeTransition.play();
+    }
+    
+
+    // Метод для обновления множителя кликов
+    public void increaseClickMultiplier(int multiplier) {
+        this.clickMultiplier *= multiplier;
     }
 
     private void animateCookie(ImageView cookieImageView) {
@@ -191,26 +220,6 @@ public class ClickerGameUI {
             batteryLabel.setText("Battery: " + battery + "/" + maxBattery);
             autoClickLabel.setText("+" + autoClicks + "/s");
         });
-    }
-
-    private void showPlusOneAnimation() {
-        Label plusOne = new Label("+1");
-        plusOne.setStyle("-fx-text-fill: red; -fx-font-size: 18px; -fx-font-weight: bold;");
-
-        // Устанавливаем случайные координаты для появления "+1"
-        double randomX = random.nextDouble() * (centerPane.getWidth() - 100) - (centerPane.getWidth() / 2 - 50);
-        double randomY = random.nextDouble() * (centerPane.getHeight() - 100) - (centerPane.getHeight() / 2 - 50);
-
-        plusOne.setTranslateX(randomX);
-        plusOne.setTranslateY(randomY);
-
-        centerPane.getChildren().add(plusOne);
-
-        FadeTransition fadeTransition = new FadeTransition(Duration.millis(1000), plusOne);
-        fadeTransition.setFromValue(1.0);
-        fadeTransition.setToValue(0.0);
-        fadeTransition.setOnFinished(event -> centerPane.getChildren().remove(plusOne));
-        fadeTransition.play();
     }
 
     private void rechargeBattery() {
