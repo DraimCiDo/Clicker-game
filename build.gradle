@@ -13,10 +13,10 @@ javafx {
 }
 
 dependencies {
-    implementation 'org.openjfx:javafx-base:26.0.2'
-    implementation 'org.openjfx:javafx-controls:26.0.2'
-    implementation 'org.openjfx:javafx-fxml:26.0.2'
-    implementation 'org.openjfx:javafx-media:26.0.2'
+    implementation 'org.openjfx:javafx-base:27'
+    implementation 'org.openjfx:javafx-controls:27'
+    implementation 'org.openjfx:javafx-fxml:27'
+    implementation 'org.openjfx:javafx-media:27'
 }
 
 application {
