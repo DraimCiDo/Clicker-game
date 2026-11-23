@@ -16,7 +16,7 @@ dependencies {
     implementation 'org.openjfx:javafx-base:27.0.1'
     implementation 'org.openjfx:javafx-controls:27.0.1'
     implementation 'org.openjfx:javafx-fxml:27.0.1'
-    implementation 'org.openjfx:javafx-media:27.0.1'
+    implementation 'org.openjfx:javafx-media:27.0.1.1'
 }
 
 application {
